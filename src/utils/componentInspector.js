@@ -1,0 +1,68 @@
+export const COMPONENT_TOKEN_MAP = Object.freeze({
+  DsTypography: ['--ds-font-family', '--ds-font-size-body-md', '--ds-color-text-primary-default', '--ds-line-height-body-md'],
+  DsButton: ['--ds-color-button-primary-default', '--ds-color-button-primary-hover', '--ds-font-size-button-primary', '--ds-spacing-control-md-inline', '--ds-spacing-control-md-block', '--ds-radius-button-primary'],
+  DsToggleGroup: ['--ds-color-bg-fill-primary-default', '--ds-spacing-button-group-gap', '--ds-radius-control-primary'],
+  DsInput: ['--ds-color-control-background-default', '--ds-color-control-border-default', '--ds-font-size-control-md', '--ds-spacing-control-md-inline', '--ds-radius-input-primary'],
+  DsTextarea: ['--ds-color-control-background-default', '--ds-color-control-border-default', '--ds-font-size-control-md', '--ds-spacing-control-md-inline', '--ds-radius-input-primary'],
+  DsSelect: ['--ds-color-control-background-default', '--ds-color-control-border-default', '--ds-font-size-control-md', '--ds-spacing-control-md-inline', '--ds-radius-input-primary'],
+  DsCheckbox: ['--ds-color-bg-fill-primary-default', '--ds-color-control-border-default', '--ds-radius-checkbox-primary'],
+  DsRadioGroup: ['--ds-color-bg-fill-primary-default', '--ds-color-control-border-default', '--ds-font-size-body-md'],
+  DsSwitch: ['--ds-color-bg-fill-primary-default', '--ds-color-border-secondary-default', '--ds-radius-switch-primary'],
+  DsSlider: ['--ds-color-bg-fill-primary-default', '--ds-color-border-primary-default', '--ds-radius-progress-primary'],
+  DsCard: ['--ds-color-bg-surface-default', '--ds-color-border-primary-default', '--ds-card-padding', '--ds-card-content-gap', '--ds-radius-card-primary'],
+  DsTabs: ['--ds-color-bg-fill-primary-default', '--ds-color-text-secondary-default', '--ds-spacing-card-padding', '--ds-radius-control-primary'],
+  DsAccordion: ['--ds-color-bg-surface-default', '--ds-color-border-primary-default', '--ds-spacing-control-md-inline', '--ds-radius-surface-primary'],
+  DsDropdownMenu: ['--ds-color-bg-surface-default', '--ds-color-border-primary-default', '--ds-radius-overlay-primary'],
+  DsNavigationMenu: ['--ds-color-bg-surface-default', '--ds-color-border-primary-focus', '--ds-radius-overlay-primary'],
+  DsPagination: ['--ds-color-bg-fill-primary-default', '--ds-color-border-primary-default', '--ds-radius-control-primary'],
+  DsBadge: ['--ds-color-bg-fill-primary-default', '--ds-font-size-badge-primary', '--ds-badge-padding-x', '--ds-radius-badge-primary'],
+  DsAlert: ['--ds-color-bg-surface-default', '--ds-color-border-primary-default', '--ds-card-padding', '--ds-radius-surface-primary'],
+  DsDialog: ['--ds-color-bg-surface-default', '--ds-color-border-primary-default', '--ds-spacing-section-primary', '--ds-radius-overlay-primary'],
+  DsAlertDialog: ['--ds-color-bg-fill-danger-default', '--ds-color-bg-surface-default', '--ds-radius-overlay-primary'],
+  DsTooltip: ['--ds-color-text-primary-default', '--ds-color-text-on-primary', '--ds-radius-tooltip-primary'],
+  DsPopover: ['--ds-color-bg-surface-default', '--ds-card-padding', '--ds-radius-overlay-primary'],
+  DsProgress: ['--ds-color-bg-fill-primary-default', '--ds-color-border-primary-default', '--ds-radius-progress-primary'],
+  DsSkeleton: ['--ds-color-bg-surface-muted', '--ds-card-padding', '--ds-radius-card-primary'],
+  DsEmptyState: ['--ds-color-bg-surface-default', '--ds-spacing-section-primary', '--ds-radius-card-primary'],
+  DsToast: ['--ds-color-bg-surface-default', '--ds-card-padding', '--ds-radius-overlay-primary'],
+})
+
+export const COMPONENT_VARIANTS = Object.freeze({
+  DsButton: ['primary', 'secondary', 'tertiary', 'outline', 'ghost', 'destructive'],
+  DsCard: ['basic', 'image', 'product', 'profile', 'pricing', 'feature', 'statistic', 'horizontal', 'interactive', 'badge', 'cta'],
+  DsBadge: ['primary', 'secondary', 'neutral', 'success', 'danger'],
+})
+
+export const COMPONENT_SIZES = Object.freeze({ DsButton: ['small', 'medium', 'large'] })
+
+export const DEFAULT_INSPECTOR_TOKENS = Object.freeze([
+  '--ds-color-text-primary-default',
+  '--ds-font-size-body-md',
+  '--ds-spacing-control-md-inline',
+  '--ds-radius-control-primary',
+])
+
+export const INSPECTOR_TOKEN_CATEGORIES = Object.freeze([
+  { id: 'color', label: 'Color' },
+  { id: 'typography', label: 'Typography' },
+  { id: 'spacing', label: 'Spacing' },
+  { id: 'radius', label: 'Radius' },
+])
+
+export function getInspectorTokenCategory(name) {
+  if (name.startsWith('--ds-color-') || name.startsWith('--ds-button-on-')) return 'color'
+  if (name.includes('font-') || name.includes('line-height') || name.startsWith('--ds-text-')) return 'typography'
+  if (name.includes('radius')) return 'radius'
+  return 'spacing'
+}
+
+export function getRadiusShapeLabel(component, value) {
+  if (String(value).trim() === '50%') return 'Circle'
+  const pixels = Number.parseFloat(value)
+  if (pixels >= 999) return 'Pill'
+  if (pixels === 0) return component === 'DsCard' ? 'Sharp' : 'Square'
+  if (component === 'DsCard' && pixels === 20) return 'Soft'
+  if (pixels <= 6) return 'Subtle'
+  if (pixels <= 12) return 'Rounded'
+  return 'Soft'
+}

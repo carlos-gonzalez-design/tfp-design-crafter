@@ -1,0 +1,33 @@
+@layer base {
+  .foundation-panel__heading .eyebrow {
+    color: var(--dc-color-muted);
+    font-family: var(--dc-font-family-mono);
+    line-height: var(--dc-line-height);
+  }
+
+  .foundation-panel .foundation-panel__title {
+    color: var(--dc-color-ink);
+    font-weight: var(--dc-font-weight-semibold);
+    line-height: 1.25;
+    letter-spacing: var(--dc-letter-spacing-heading);
+  }
+
+  .eyebrow {
+    margin: 0 0 0.5rem;
+    color: var(--dc-color-muted);
+    font-family: var(--dc-font-family-mono);
+    font-size: 0.625rem;
+    font-weight: var(--dc-font-weight-medium);
+    letter-spacing: var(--dc-letter-spacing-eyebrow);
+    text-transform: uppercase;
+  }
+
+  .foundation-panel__title,
+  .preview-area__title,
+  .generated-css__title {
+    margin: 0;
+    color: var(--dc-color-ink);
+    font-family: var(--dc-font-family-sans);
+    font-weight: var(--dc-font-weight-semibold);
+  }
+}
