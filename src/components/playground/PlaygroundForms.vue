@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { Search } from '@lucide/vue'
 import DsButton from '../design-system/actions/DsButton.vue'
 import DsCheckbox from '../design-system/forms/DsCheckbox.vue'
 import DsField from '../design-system/forms/DsField.vue'
@@ -21,6 +22,7 @@ const updates = ref(true)
 const visibility = ref('team')
 const publicProfile = ref(true)
 const intensity = ref([64])
+const announcement = ref('')
 
 const roleOptions = [
   { value: 'designer', label: 'Product Designer' },
@@ -33,6 +35,24 @@ const visibilityOptions = [
   { value: 'team', label: 'My team' },
   { value: 'public', label: 'Everyone' },
 ]
+
+function saveProfile() {
+  announcement.value = `Profile saved for ${name.value || 'unnamed collaborator'}`
+}
+
+function resetForm() {
+  name.value = 'Alex Morgan'
+  email.value = 'alex@example.com'
+  password.value = ''
+  search.value = ''
+  bio.value = ''
+  role.value = 'designer'
+  updates.value = true
+  visibility.value = 'team'
+  publicProfile.value = true
+  intensity.value = [64]
+  announcement.value = 'Profile changes reset'
+}
 </script>
 
 <template>
@@ -42,7 +62,7 @@ const visibilityOptions = [
       title="Forms"
       description="Native fields and accessible Reka controls share one reactive visual language."
     />
-    <form class="ds-form-demo" @submit.prevent>
+    <form class="ds-form-demo" @submit.prevent="saveProfile">
       <div class="ds-form-demo__fields">
         <DsField id="form-name" label="Full name" description="Use the name shown to collaborators." required v-slot="{ describedby }">
           <DsInput id="form-name" v-model="name" :describedby="describedby" />
@@ -54,7 +74,7 @@ const visibilityOptions = [
           <DsInput id="form-password" v-model="password" type="password" placeholder="Enter password" :describedby="describedby" />
         </DsField>
         <DsField id="form-search" label="Search" v-slot="{ describedby }">
-          <DsInput id="form-search" v-model="search" type="search" icon="⌕" placeholder="Search projects" :describedby="describedby" />
+          <DsInput id="form-search" v-model="search" type="search" placeholder="Search projects" :describedby="describedby"><template #icon><Search :size="18" aria-hidden="true" /></template></DsInput>
         </DsField>
         <DsField id="form-role" label="Role">
           <DsSelect v-model="role" :options="roleOptions" label="Role" />
@@ -80,7 +100,8 @@ const visibilityOptions = [
           <DsSlider v-model="intensity" label="Notification intensity" />
         </div>
       </div>
-      <div class="ds-examples__buttons"><DsButton type="submit">Save profile</DsButton><DsButton variant="ghost">Cancel</DsButton></div>
+      <div class="ds-examples__buttons"><DsButton type="submit">Save profile</DsButton><DsButton variant="ghost" @click="resetForm">Cancel</DsButton></div>
+      <p class="sr-only" role="status" aria-live="polite">{{ announcement }}</p>
     </form>
   </section>
 </template>

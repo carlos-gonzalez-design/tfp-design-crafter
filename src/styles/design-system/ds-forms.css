@@ -38,6 +38,9 @@
       color: var(--ds-color-text-secondary-default);
       transform: translateY(-50%);
       pointer-events: none;
+
+      &,
+      & > svg { width: 1.125rem; height: 1.125rem; }
     }
   }
 
@@ -82,7 +85,7 @@
     &[data-placeholder] { color: var(--ds-color-control-placeholder); }
   }
 
-  .ds-select__icon { color: var(--ds-color-text-secondary-default); }
+  .ds-select__icon { display: inline-flex; flex: 0 0 auto; color: var(--ds-color-text-secondary-default); }
 
   .ds-select__content {
     z-index: 40;
@@ -116,6 +119,7 @@
   .ds-select__indicator {
     position: absolute;
     inset-inline-end: var(--ds-space-sm);
+    display: inline-flex;
   }
 
   .ds-check-control,
@@ -157,7 +161,7 @@
   }
 
   .ds-checkbox { border-radius: var(--ds-radius-checkbox-primary); }
-  .ds-checkbox__indicator { font-size: var(--ds-font-size-body-sm); }
+  .ds-checkbox__indicator { display: grid; place-items: center; font-size: var(--ds-font-size-body-sm); }
   .ds-radio { border-radius: 50%; }
   .ds-radio__indicator { width: var(--ds-space-xs); height: var(--ds-space-xs); border-radius: 50%; background: currentColor; }
   .ds-radio-group { display: grid; gap: var(--ds-space-xs); }

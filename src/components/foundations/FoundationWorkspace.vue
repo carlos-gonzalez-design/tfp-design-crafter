@@ -4,10 +4,18 @@ import DcButton from '../ui/DcButton.vue'
 import DcInput from '../ui/DcInput.vue'
 import DcSelect from '../ui/DcSelect.vue'
 import DcTabs from '../ui/DcTabs.vue'
+import TokenValueDisplay from '../ui/TokenValueDisplay.vue'
 import GeneratedCSS from '../preview/GeneratedCSS.vue'
 import DsButton from '../design-system/actions/DsButton.vue'
 import DsCard from '../design-system/cards/DsCard.vue'
 import DsInput from '../design-system/forms/DsInput.vue'
+import {
+  getAccessibleTextColor,
+  getContrastLabel,
+  getContrastRatio,
+  getPrimaryColorScale,
+  normalizeHexColor,
+} from '../../utils/colorScale.js'
 import {
   DENSITY_CONFIG,
   getAvailableFontWeights,
@@ -34,6 +42,9 @@ const props = defineProps({
 
 const activeTab = ref('edit')
 const showFullCss = ref(false)
+const primaryHexDraft = ref(props.foundations.colors.primary)
+const primaryHexError = ref('')
+const contrastTextMode = ref('auto')
 const baseSizeDraft = ref(String(props.foundations.typography.baseSize))
 const baseSizeError = ref('')
 const sampleText = ref('Design for every scale.')
@@ -44,12 +55,22 @@ const fontOptions = [
   { value: 'Georgia, serif', label: 'Georgia' },
   { value: "'Trebuchet MS', sans-serif", label: 'Trebuchet MS' },
 ]
-const colorFields = [
-  { key: 'primary', label: 'Primary' },
-  { key: 'secondary', label: 'Secondary' },
-  { key: 'background', label: 'Background' },
-  { key: 'surface', label: 'Surface' },
-  { key: 'text', label: 'Text' },
+const contrastTextOptions = [
+  { value: 'auto', label: 'Automático' },
+  { value: 'white', label: 'Blanco' },
+  { value: 'black', label: 'Negro' },
+]
+const neutralColorTokens = [
+  { name: '--color-neutral-text', label: 'Text' },
+  { name: '--color-neutral-background', label: 'Background' },
+  { name: '--color-neutral-surface', label: 'Surface' },
+  { name: '--color-neutral-border', label: 'Border' },
+]
+const stateColorTokens = [
+  { name: '--color-state-success', label: 'Success' },
+  { name: '--color-state-warning', label: 'Warning' },
+  { name: '--color-state-error', label: 'Error' },
+  { name: '--color-state-info', label: 'Information' },
 ]
 const radiusCategories = Object.entries(RADIUS_OPTIONS).map(([id, definition]) => ({ id, ...definition }))
 const densityOptions = Object.keys(DENSITY_CONFIG).map(value => ({
@@ -71,6 +92,24 @@ const appliedSpacing = computed(() => {
   const assignments = getAppliedSpacing(props.foundations.spacing.density)
   return appliedSpacingFields.map(field => ({ ...field, ...assignments[field.key] }))
 })
+const primaryColorScale = computed(() => getPrimaryColorScale(props.foundations.colors.primary))
+const contrastSamples = computed(() => primaryColorScale.value.map(tone => {
+  const automatic = getAccessibleTextColor(tone.hex)
+  const foreground = contrastTextMode.value === 'white'
+    ? '#FFFFFF'
+    : contrastTextMode.value === 'black'
+      ? '#000000'
+      : automatic.hex
+  const ratio = getContrastRatio(tone.hex, foreground)
+  return {
+    ...tone,
+    foreground,
+    ratio,
+    ratioLabel: `${ratio.toFixed(1).replace('.', ',')}:1`,
+    compliance: getContrastLabel(ratio),
+    passesContrast: ratio >= 4.5,
+  }
+}))
 const typeScale = computed(() => getTypographyScale(props.foundations.typography))
 const semanticType = computed(() => getTypographySemanticScale(props.foundations.typography))
 const typeTokenOptions = computed(() => typeScale.value.map(token => ({
@@ -108,7 +147,7 @@ const tokenRows = computed(() => Object.entries(foundationTokens.value).map(([na
   }
 }))
 const tokenGroups = computed(() => {
-  if (props.activeFoundation === 'radius') {
+  if (['colors', 'radius'].includes(props.activeFoundation)) {
     return ['Primitive', 'Semantic', 'Component'].map(level => ({
       id: level.toLowerCase(),
       label: `${level} tokens`,
@@ -131,6 +170,33 @@ watch(() => props.activeFoundation, () => {
 watch(() => props.foundations.typography.baseSize, value => {
   baseSizeDraft.value = String(value)
 })
+
+watch(() => props.foundations.colors.primary, value => {
+  const normalized = normalizeHexColor(value)
+  if (!normalized) return
+  primaryHexDraft.value = normalized
+  primaryHexError.value = ''
+})
+
+function setPrimaryColor(value) {
+  const normalized = normalizeHexColor(value)
+  if (!normalized) return false
+  props.foundations.colors.primary = normalized
+  primaryHexDraft.value = normalized
+  primaryHexError.value = ''
+  return true
+}
+
+function updatePrimaryPicker(event) {
+  setPrimaryColor(event.target.value)
+}
+
+function updatePrimaryHex(event) {
+  primaryHexDraft.value = event.target.value
+  if (!setPrimaryColor(event.target.value)) {
+    primaryHexError.value = 'Introduce un hexadecimal válido, por ejemplo #4353FF.'
+  }
+}
 
 function updateBaseSize(event) {
   baseSizeDraft.value = event.target.value
@@ -199,20 +265,92 @@ function navigateRadiusOptions(event, category, index) {
       <template #default="{ activeTab: currentTab }">
         <div v-if="currentTab === 'edit'" class="foundation-editor">
           <template v-if="activeFoundation === 'colors'">
-            <section class="foundation-settings__section foundation-settings__section--wide" aria-labelledby="colors-settings-title">
-              <div class="foundation-settings__heading">
-                <div><h3 id="colors-settings-title">System palette</h3><p>Choose the five colors used to generate component surfaces, content and accents.</p></div>
-                <span>5 tokens</span>
-              </div>
-              <div class="foundation-color-grid">
-                <label v-for="field in colorFields" :key="field.key" class="foundation-color-control">
-                  <span class="foundation-color-control__swatch" :style="{ backgroundColor: foundations.colors[field.key] }" aria-hidden="true"></span>
-                  <span class="foundation-color-control__meta"><strong>{{ field.label }}</strong><code>--ds-color-{{ field.key }}</code></span>
-                  <span class="foundation-color-control__value">{{ foundations.colors[field.key] }}</span>
-                  <input v-model="foundations.colors[field.key]" type="color" :aria-label="`${field.label} color`" />
-                </label>
-              </div>
-            </section>
+            <div class="foundation-settings-grid foundation-settings-grid--colors" :style="cssVariables">
+              <section class="foundation-settings__section foundation-settings__section--wide" aria-labelledby="colors-settings-title">
+                <div class="foundation-settings__heading">
+                  <div><h3 id="colors-settings-title">Primary</h3><p>Choose one source color. Design Crafter generates a perceptual OKLCH scale without replacing the selected value.</p></div>
+                  <span>11 tones</span>
+                </div>
+
+                <div class="foundation-primary-control">
+                  <label class="foundation-primary-control__picker">
+                    <span class="control-row__label">Source color</span>
+                    <input :value="foundations.colors.primary" type="color" aria-label="Primary source color" @input="updatePrimaryPicker" />
+                  </label>
+                  <label class="foundation-primary-control__hex" for="primary-color-hex">
+                    <span class="control-row__label">Hexadecimal</span>
+                    <input
+                      id="primary-color-hex"
+                      :value="primaryHexDraft"
+                      type="text"
+                      inputmode="text"
+                      autocomplete="off"
+                      spellcheck="false"
+                      aria-describedby="primary-color-source primary-color-error"
+                      :aria-invalid="primaryHexError ? 'true' : undefined"
+                      @input="updatePrimaryHex"
+                    />
+                  </label>
+                  <div id="primary-color-source" class="foundation-primary-control__source">
+                    <span :style="{ backgroundColor: foundations.colors.primary }" aria-hidden="true"></span>
+                    <div><small>Exact source</small><strong>{{ foundations.colors.primary }}</strong><code>--color-primary-source</code></div>
+                  </div>
+                </div>
+                <p id="primary-color-error" class="foundation-primary-control__error" aria-live="polite">{{ primaryHexError }}</p>
+
+                <div class="foundation-contrast-toolbar">
+                  <div><strong>Color de la letra</strong><p>Solo modifica la comprobación de estas muestras.</p></div>
+                  <div class="foundation-contrast-toolbar__options" role="group" aria-label="Color de la letra para comprobar contraste">
+                    <button
+                      v-for="option in contrastTextOptions"
+                      :key="option.value"
+                      type="button"
+                      :aria-pressed="contrastTextMode === option.value"
+                      @click="contrastTextMode = option.value"
+                    >{{ option.label }}</button>
+                  </div>
+                </div>
+
+                <div class="foundation-color-scale" aria-label="Primary color scale and normal-text contrast">
+                  <article v-for="tone in contrastSamples" :key="tone.name" class="foundation-color-sample">
+                    <header><strong>{{ tone.name }}</strong><code>{{ tone.token }}</code></header>
+                    <div class="foundation-color-sample__swatch" :style="{ backgroundColor: tone.hex, color: tone.foreground }" aria-hidden="true">A</div>
+                    <div class="foundation-color-sample__result">
+                      <code>{{ tone.hex }}</code>
+                      <div class="foundation-contrast-result">
+                        <strong class="foundation-contrast-result__ratio">{{ tone.ratioLabel }}</strong>
+                        <span
+                          class="foundation-contrast-result__status"
+                          :class="tone.passesContrast ? 'foundation-contrast-result__status--pass' : 'foundation-contrast-result__status--fail'"
+                        >{{ tone.compliance }}</span>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </section>
+
+              <section class="foundation-settings__section" aria-labelledby="neutral-colors-title">
+                <div class="foundation-settings__heading"><div><h3 id="neutral-colors-title">Neutrals</h3><p>Reading, surface and boundary colors remain stable.</p></div><span>{{ neutralColorTokens.length }} colors</span></div>
+                <div class="foundation-color-reference-list">
+                  <div v-for="token in neutralColorTokens" :key="token.name">
+                    <span :style="{ backgroundColor: resolveTokenValue(token.name) }" aria-hidden="true"></span>
+                    <div><strong>{{ token.label }}</strong><code>{{ token.name }}</code></div>
+                    <code>{{ resolveTokenValue(token.name) }}</code>
+                  </div>
+                </div>
+              </section>
+
+              <section class="foundation-settings__section" aria-labelledby="state-colors-title">
+                <div class="foundation-settings__heading"><div><h3 id="state-colors-title">States</h3><p>Feedback colors are independent from the primary palette.</p></div><span>{{ stateColorTokens.length }} colors</span></div>
+                <div class="foundation-color-reference-list">
+                  <div v-for="token in stateColorTokens" :key="token.name">
+                    <span :style="{ backgroundColor: resolveTokenValue(token.name) }" aria-hidden="true"></span>
+                    <div><strong>{{ token.label }}</strong><code>{{ token.name }}</code></div>
+                    <code>{{ resolveTokenValue(token.name) }}</code>
+                  </div>
+                </div>
+              </section>
+            </div>
           </template>
 
           <template v-else-if="activeFoundation === 'typography'">
@@ -372,13 +510,13 @@ function navigateRadiusOptions(event, category, index) {
           </template>
         </div>
 
-        <section v-else-if="currentTab === 'tokens'" class="foundation-tokens" aria-labelledby="foundation-tokens-title">
+        <section v-else-if="currentTab === 'tokens'" class="foundation-tokens" :style="cssVariables" aria-labelledby="foundation-tokens-title">
           <div class="foundation-tokens__intro"><div><h3 id="foundation-tokens-title">{{ activeSection.label }} tokens</h3><p>Live values derived from the same source used by Preview and generated CSS.</p></div><span>{{ tokenRows.length }} tokens</span></div>
           <p class="foundation-tokens__notice">Token names are read-only to keep CSS references synchronized.</p>
           <div class="foundation-tokens__table-wrap">
             <table class="foundation-tokens__table" :class="{ 'foundation-tokens__table--radius': activeFoundation === 'radius' }">
               <thead>
-                <tr v-if="activeFoundation === 'radius'"><th scope="col">Token</th><th scope="col">Level</th><th scope="col">Reference</th><th scope="col">Effective value</th><th scope="col">Unit</th></tr>
+                <tr v-if="activeFoundation === 'radius'"><th scope="col">Token</th><th scope="col">Level</th><th scope="col">CSS value</th><th scope="col">Effective value</th><th scope="col">Unit</th></tr>
                 <tr v-else><th scope="col">Token</th><th scope="col">Current value</th><th scope="col">Reference</th></tr>
               </thead>
               <tbody>
@@ -387,10 +525,20 @@ function navigateRadiusOptions(event, category, index) {
                   <tr v-for="token in group.rows" :key="token.name">
                     <th scope="row"><code>{{ token.name }}</code></th>
                     <template v-if="activeFoundation === 'radius'">
-                      <td>{{ token.level }}</td><td><code>{{ token.reference }}</code></td><td><code>{{ token.effective }}</code></td><td>{{ token.unit }}</td>
+                      <td data-label="Level">{{ token.level }}</td>
+                      <td data-label="CSS value"><TokenValueDisplay :value="token.value" :resolved-value="token.effective" /></td>
+                      <td data-label="Effective value"><code>{{ token.effective }}</code></td>
+                      <td data-label="Unit">{{ token.unit }}</td>
                     </template>
                     <template v-else>
-                      <td><span v-if="activeFoundation === 'colors' && token.value.startsWith('#')" class="foundation-tokens__swatch" :style="{ backgroundColor: token.value }" aria-hidden="true"></span><code>{{ token.value }}</code></td><td>{{ token.reference }}</td>
+                      <td data-label="Current value">
+                        <TokenValueDisplay
+                          :value="token.value"
+                          :resolved-value="token.effective"
+                          :color="activeFoundation === 'colors' ? `var(${token.name})` : ''"
+                        />
+                      </td>
+                      <td data-label="Reference"><code class="foundation-tokens__reference">{{ token.reference }}</code></td>
                     </template>
                   </tr>
                 </template>
@@ -404,7 +552,7 @@ function navigateRadiusOptions(event, category, index) {
             <div><h3 id="foundation-code-title">{{ showFullCss ? 'Complete design system CSS' : `${activeSection.label} CSS` }}</h3><p>The output stays synchronized with the current Vue state.</p></div>
             <DcButton variant="secondary" size="small" @click="showFullCss = !showFullCss">{{ showFullCss ? 'Show foundation CSS' : 'Show all CSS' }}</DcButton>
           </div>
-          <GeneratedCSS :css-variables="visibleCodeTokens" />
+          <GeneratedCSS :css-variables="visibleCodeTokens" :include-component-styles="activeFoundation === 'colors'" />
         </section>
       </template>
     </DcTabs>

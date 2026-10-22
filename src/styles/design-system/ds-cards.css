@@ -15,8 +15,8 @@
     cursor: pointer;
     transition: border-color 160ms ease, transform 160ms ease;
 
-    &:hover { border-color: var(--ds-color-border-primary-focus); transform: translateY(calc(var(--ds-space-4xs) * -1)); }
-    &:focus-visible { outline: 0.125rem solid var(--ds-color-border-primary-focus); outline-offset: var(--ds-space-3xs); }
+    &:hover { border-color: var(--ds-color-selection-border); transform: translateY(calc(var(--ds-space-4xs) * -1)); }
+    &:focus-visible { outline: 0.125rem solid var(--ds-color-focus-ring); outline-offset: var(--ds-space-3xs); }
   }
 
   .ds-card__content {
@@ -44,10 +44,10 @@
     justify-self: start;
     gap: var(--ds-badge-gap);
     padding: var(--ds-badge-padding-y) var(--ds-badge-padding-x);
-    border: 1px solid var(--ds-color-bg-fill-secondary-default);
+    border: 1px solid var(--ds-color-selection-border);
     border-radius: var(--ds-radius-badge-primary);
-    color: var(--ds-color-text-on-secondary);
-    background: var(--ds-color-bg-fill-secondary-default);
+    color: var(--ds-color-badge-brand-text);
+    background: var(--ds-color-badge-brand-background);
     font-size: var(--ds-font-size-badge-primary);
     font-weight: var(--ds-text-caption-weight);
   }
@@ -93,14 +93,17 @@
 
   .ds-card__feature-icon,
   .ds-card__trend {
-    color: var(--ds-color-bg-fill-primary-default);
+    color: var(--ds-color-link-default);
     font-size: var(--ds-font-size-body-sm);
     font-weight: var(--ds-font-weight-label-sm);
   }
 
+  .ds-card__feature-icon,
+  .ds-card__trend { display: inline-flex; align-items: center; gap: var(--ds-space-3xs); }
+
   .ds-card--profile { justify-items: start; }
   .ds-card--profile .ds-card__media { overflow: visible; }
-  .ds-card--pricing { border-color: var(--ds-color-bg-fill-primary-default); }
+  .ds-card--pricing { border-color: var(--ds-color-selection-border); }
   .ds-card--statistic { background: var(--ds-color-bg-surface-muted); }
   .ds-card--cta { color: var(--ds-color-text-on-primary); background: var(--ds-color-bg-fill-primary-default); }
   .ds-card--cta :is(.ds-typography--h3, .ds-typography--body) { color: inherit; }

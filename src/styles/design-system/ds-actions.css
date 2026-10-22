@@ -9,8 +9,8 @@
     padding: var(--ds-button-md-padding-y) var(--ds-button-md-padding-x);
     border: 1px solid transparent;
     border-radius: var(--ds-radius-button-primary);
-    color: var(--ds-color-text-on-primary);
-    background: var(--ds-color-button-primary-default);
+    color: var(--ds-color-button-primary-text-default);
+    background: var(--ds-color-button-primary-background-default);
     font-family: var(--ds-font-family);
     font-size: var(--ds-font-size-button-primary);
     font-weight: var(--ds-font-weight-button-primary);
@@ -21,26 +21,27 @@
     transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
 
     &.ds-button--secondary {
-      color: var(--ds-color-text-on-secondary);
-      background: var(--ds-color-button-secondary-default);
+      color: var(--ds-color-button-secondary-text-default);
+      border-color: var(--ds-color-button-secondary-border-default);
+      background: var(--ds-color-button-secondary-background-default);
     }
 
     &.ds-button--outline {
-      color: var(--ds-color-text-primary-default);
-      border-color: var(--ds-color-border-primary-focus);
-      background: var(--ds-color-bg-surface-default);
+      color: var(--ds-color-button-secondary-text-default);
+      border-color: var(--ds-color-button-secondary-border-default);
+      background: var(--ds-color-button-secondary-background-default);
     }
 
-    &.ds-button--ghost { color: var(--ds-color-text-primary-default); background: transparent; }
+    &.ds-button--ghost { color: var(--ds-color-button-tertiary-text-default); background: transparent; }
 
     &.ds-button--tertiary {
-      color: var(--ds-color-bg-fill-primary-default);
-      background: color-mix(in srgb, var(--ds-color-bg-fill-primary-default) 12%, var(--ds-color-bg-surface-default));
+      color: var(--ds-color-button-tertiary-text-default);
+      background: transparent;
     }
 
     &.ds-button--destructive {
-      color: var(--ds-color-text-on-secondary);
-      background: var(--ds-color-bg-fill-danger-default);
+      color: var(--ds-color-text-on-error);
+      background: var(--ds-color-status-error);
     }
 
     &.ds-button--small {
@@ -62,39 +63,42 @@
     }
 
     &:hover:not(:disabled) {
-      background: var(--ds-color-button-primary-hover);
+      color: var(--ds-color-button-primary-text-hover);
+      background: var(--ds-color-button-primary-background-hover);
     }
 
     &:active:not(:disabled) {
-      background: var(--ds-color-button-primary-active);
+      color: var(--ds-color-button-primary-text-active);
+      background: var(--ds-color-button-primary-background-active);
     }
 
     &.ds-button--secondary:hover:not(:disabled) {
-      background: var(--ds-color-button-secondary-hover);
+      color: var(--ds-color-button-secondary-text-default);
+      background: var(--ds-color-button-secondary-background-hover);
     }
 
     &.ds-button--secondary:active:not(:disabled) {
-      background: var(--ds-color-button-secondary-active);
+      background: var(--ds-color-button-secondary-background-active);
     }
 
     &.ds-button--tertiary:hover:not(:disabled) {
-      color: var(--ds-color-bg-fill-primary-default);
-      background: color-mix(in srgb, var(--ds-color-bg-fill-primary-default) 18%, var(--ds-color-bg-surface-default));
+      color: var(--ds-color-button-tertiary-text-default);
+      background: var(--ds-color-button-tertiary-background-hover);
     }
 
-    &.ds-button--destructive:hover:not(:disabled) { background: var(--ds-color-bg-fill-danger-hover); }
+    &.ds-button--destructive:hover:not(:disabled) { color: var(--ds-color-text-on-error); background: var(--ds-color-bg-fill-danger-hover); }
 
     &:is(.ds-button--outline, .ds-button--ghost):hover:not(:disabled) {
-      color: var(--ds-color-bg-fill-primary-default);
-      background: color-mix(in srgb, var(--ds-color-bg-fill-primary-default) 10%, var(--ds-color-bg-surface-default));
+      color: var(--ds-color-button-secondary-text-default);
+      background: var(--ds-color-button-secondary-background-hover);
     }
 
     &:is(.ds-button--outline, .ds-button--ghost):active:not(:disabled) {
-      color: var(--ds-color-bg-fill-primary-default);
-      background: color-mix(in srgb, var(--ds-color-bg-fill-primary-default) 18%, var(--ds-color-bg-surface-default));
+      color: var(--ds-color-button-secondary-text-default);
+      background: var(--ds-color-button-secondary-background-active);
     }
 
-    &:focus-visible { outline: 0.125rem solid var(--ds-color-border-primary-focus); outline-offset: 0.1875rem; }
+    &:focus-visible { outline: 0.125rem solid var(--ds-color-focus-ring); outline-offset: 0.1875rem; }
     &:disabled {
       opacity: 0.55;
       cursor: not-allowed;
@@ -109,6 +113,19 @@
     border-top-color: currentColor;
     border-radius: 50%;
     animation: ds-spin 800ms linear infinite;
+  }
+
+  .ds-button > svg,
+  .ds-button__label > svg {
+    width: 1em;
+    height: 1em;
+    flex: 0 0 auto;
+  }
+
+  .ds-button__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-button-gap);
   }
 
   .ds-toggle-group {
@@ -132,9 +149,9 @@
     cursor: pointer;
 
     &:hover:not([data-disabled]) { color: var(--ds-color-text-primary-default); background: var(--ds-color-bg-surface-muted); }
-    &[data-state='on'] { color: var(--ds-color-text-on-primary); background: var(--ds-color-bg-fill-primary-default); }
+    &[data-state='on'] { color: var(--ds-color-selection-text); background: var(--ds-color-selection-background); box-shadow: inset 0 0 0 1px var(--ds-color-selection-border); }
     &[data-disabled] { opacity: 0.5; cursor: not-allowed; }
-    &:focus-visible { outline: 0.125rem solid var(--ds-color-border-primary-focus); outline-offset: var(--ds-space-3xs); }
+    &:focus-visible { outline: 0.125rem solid var(--ds-color-focus-ring); outline-offset: var(--ds-space-3xs); }
   }
 
   @keyframes ds-spin { to { transform: rotate(360deg); } }

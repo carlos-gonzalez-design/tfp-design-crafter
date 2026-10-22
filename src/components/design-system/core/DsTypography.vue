@@ -1,10 +1,10 @@
 <script setup>
 const props = defineProps({
-  variant: { type: String, default: 'body', validator: value => ['display', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'body-large', 'body', 'small', 'label', 'caption', 'link', 'blockquote'].includes(value) },
+  variant: { type: String, default: 'body', validator: value => ['display', 'h1', 'h2', 'h3', 'h4', 'body-large', 'body', 'small', 'label', 'caption', 'link', 'blockquote'].includes(value) },
   href: { type: String, default: undefined },
 })
 const elements = {
-  display: 'p', h1: 'h1', h2: 'h2', h3: 'h3', h4: 'h4', h5: 'h5', h6: 'h6',
+  display: 'p', h1: 'h1', h2: 'h2', h3: 'h3', h4: 'h4',
   'body-large': 'p', body: 'p', small: 'p', label: 'span', caption: 'p', link: 'a', blockquote: 'blockquote',
 }
 </script>

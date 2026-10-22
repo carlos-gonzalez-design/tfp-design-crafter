@@ -8,8 +8,6 @@ const samples = [
   { variant: 'h2', label: 'Heading 2', text: 'Build something considered.' },
   { variant: 'h3', label: 'Heading 3', text: 'Every detail matters.' },
   { variant: 'h4', label: 'Heading 4', text: 'A useful section heading.' },
-  { variant: 'h5', label: 'Heading 5', text: 'A compact group heading.' },
-  { variant: 'h6', label: 'Heading 6', text: 'A precise supporting heading.' },
   { variant: 'body-large', label: 'Body Large', text: 'A generous introduction for important supporting content.' },
   { variant: 'body', label: 'Body', text: 'A clear visual language brings your next bright idea into focus.' },
   { variant: 'small', label: 'Small', text: 'Useful supporting information at a quieter scale.' },

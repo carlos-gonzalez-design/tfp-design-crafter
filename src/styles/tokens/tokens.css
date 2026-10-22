@@ -39,6 +39,9 @@
   --dc-color-warning-soft: var(--dc-color-warning-50);
   --dc-color-danger: var(--dc-color-danger-600);
   --dc-color-danger-soft: var(--dc-color-danger-50);
+  --dc-color-contrast-pass: #166534;
+  --dc-color-contrast-fail: #991b1b;
+  --dc-color-on-contrast-status: #ffffff;
 
   /* Typography */
   --dc-font-family-sans: "Geist", sans-serif;

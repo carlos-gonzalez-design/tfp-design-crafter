@@ -1,5 +1,6 @@
 <script setup>
 import { inject, ref } from 'vue'
+import { X } from '@lucide/vue'
 import { ToastClose, ToastDescription, ToastProvider, ToastRoot, ToastTitle, ToastViewport } from 'reka-ui'
 import { DS_PORTAL_ROOT } from '../dsContext.js'
 
@@ -14,7 +15,7 @@ const portalRoot = inject(DS_PORTAL_ROOT, undefined)
     <Teleport v-if="portalRoot" :to="portalRoot">
       <ToastRoot v-model:open="open" class="ds-toast">
         <div><ToastTitle class="ds-toast__title">{{ title }}</ToastTitle><ToastDescription class="ds-toast__description">{{ description }}</ToastDescription></div>
-        <ToastClose class="ds-toast__close" aria-label="Dismiss notification">×</ToastClose>
+        <ToastClose class="ds-toast__close" aria-label="Dismiss notification"><X :size="16" aria-hidden="true" /></ToastClose>
       </ToastRoot>
       <ToastViewport class="ds-toast__viewport" />
     </Teleport>

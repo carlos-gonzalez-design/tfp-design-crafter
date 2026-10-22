@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import DcButton from '../ui/DcButton.vue'
+import { getPrimaryColorScale } from '../../utils/colorScale.js'
 import {
   getAppliedSpacing,
   getRadiusDecision,
@@ -22,6 +23,9 @@ const ratioLabel = computed(() => TYPE_SCALE_RATIOS.find(
   option => option.value === Number(props.foundations.typography.scaleRatio),
 )?.label ?? 'Custom ratio')
 const appliedSpacing = computed(() => getAppliedSpacing(props.foundations.spacing.density))
+const overviewPrimaryTones = computed(() => getPrimaryColorScale(props.foundations.colors.primary).filter(
+  tone => ['100', '300', '500', '700', '900'].includes(tone.name),
+))
 const radiusOverview = computed(() => Object.entries(RADIUS_OPTIONS).map(([id, category]) => ({
   id,
   category: category.label.replace(' Shape', '').replace(' Corners', ''),
@@ -44,9 +48,9 @@ const radiusOverview = computed(() => Object.entries(RADIUS_OPTIONS).map(([id, c
           <DcButton size="small" variant="secondary" @click="emit('edit', 'colors')">Edit colors</DcButton>
         </div>
         <div class="overview-colors" aria-label="Current color palette">
-          <span v-for="(value, name) in foundations.colors" :key="name" :style="{ backgroundColor: value }" :title="`${name}: ${value}`"></span>
+          <span v-for="tone in overviewPrimaryTones" :key="tone.name" :style="{ backgroundColor: tone.hex }" :title="`Primary ${tone.name}: ${tone.hex}`"></span>
         </div>
-        <p class="overview-card__summary">{{ Object.keys(foundations.colors).length }} connected palette tokens</p>
+        <p class="overview-card__summary">11 generated primary tones · 4 neutrals · 4 state colors</p>
       </article>
 
       <article class="overview-card overview-card--type">

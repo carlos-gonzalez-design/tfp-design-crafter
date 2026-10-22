@@ -1,4 +1,5 @@
 <script setup>
+import { Check } from '@lucide/vue'
 import { CheckboxIndicator, CheckboxRoot } from 'reka-ui'
 
 defineProps({
@@ -19,7 +20,7 @@ const emit = defineEmits(['update:modelValue'])
       data-ds-component="DsCheckbox"
       @update:model-value="emit('update:modelValue', $event)"
     >
-      <CheckboxIndicator class="ds-checkbox__indicator">✓</CheckboxIndicator>
+      <CheckboxIndicator class="ds-checkbox__indicator"><Check :size="14" aria-hidden="true" /></CheckboxIndicator>
     </CheckboxRoot>
     <span>{{ label }}</span>
   </label>

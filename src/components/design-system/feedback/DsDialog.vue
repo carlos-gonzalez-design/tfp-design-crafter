@@ -1,5 +1,6 @@
 <script setup>
 import { inject } from 'vue'
+import { X } from '@lucide/vue'
 import { DialogClose, DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogRoot, DialogTitle, DialogTrigger } from 'reka-ui'
 import { DS_PORTAL_ROOT } from '../dsContext.js'
 
@@ -17,7 +18,7 @@ const portalRoot = inject(DS_PORTAL_ROOT, undefined)
         <DialogDescription class="ds-dialog__description">{{ description }}</DialogDescription>
         <slot />
         <div class="ds-dialog__actions"><DialogClose class="ds-button ds-button--primary ds-button--medium">Done</DialogClose></div>
-        <DialogClose class="ds-dialog__close" aria-label="Close dialog">×</DialogClose>
+        <DialogClose class="ds-dialog__close" aria-label="Close dialog"><X :size="16" aria-hidden="true" /></DialogClose>
       </DialogContent>
     </DialogPortal>
   </DialogRoot>

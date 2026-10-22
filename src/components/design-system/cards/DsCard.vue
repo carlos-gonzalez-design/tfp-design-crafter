@@ -10,6 +10,8 @@ defineProps({
   variant: { type: String, default: 'basic' },
   interactive: { type: Boolean, default: false },
 })
+
+const emit = defineEmits(['activate'])
 </script>
 
 <template>
@@ -17,8 +19,13 @@ defineProps({
     class="ds-card"
     :class="[`ds-card--${variant}`, { 'ds-card--interactive': interactive }]"
     :tabindex="interactive ? 0 : undefined"
+    :role="interactive ? 'button' : undefined"
+    :aria-label="interactive ? title : undefined"
     data-ds-component="DsCard"
     :data-ds-variant="variant"
+    @click="interactive && emit('activate')"
+    @keydown.enter="interactive && emit('activate')"
+    @keydown.space.prevent="interactive && emit('activate')"
   >
     <div v-if="image || $slots.media" class="ds-card__media">
       <slot name="media"><img class="ds-card__image" :src="image" :alt="imageAlt" /></slot>

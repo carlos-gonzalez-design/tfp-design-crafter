@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import TokenValueDisplay from '../ui/TokenValueDisplay.vue'
 import { COMPONENT_SIZES, COMPONENT_VARIANTS, INSPECTOR_TOKEN_CATEGORIES } from '../../utils/componentInspector.js'
 
 const props = defineProps({ selection: { type: Object, default: null } })
@@ -53,21 +54,15 @@ const tokenGroups = computed(() => INSPECTOR_TOKEN_CATEGORIES.map(category => ({
               class="component-inspector__token"
               :class="{ 'component-inspector__token--color': token.category === 'color' }"
             >
-              <span
-                v-if="token.category === 'color'"
-                class="component-inspector__swatch"
-                :style="{ '--component-token-color': token.swatch }"
-                aria-hidden="true"
-              ></span>
-              <span class="component-inspector__token-copy">
+              <div class="component-inspector__token-copy">
                 <code>{{ token.name }}</code>
+                <TokenValueDisplay :value="token.cssValue" :resolved-value="token.value" :color="token.category === 'color' ? token.swatch : ''" />
                 <dl v-if="token.category === 'radius'" class="component-inspector__token-details">
                   <div><dt>Reference</dt><dd><code>{{ token.reference }}</code></dd></div>
                   <div><dt>Computed</dt><dd>{{ token.value }}</dd></div>
                   <div><dt>Shape</dt><dd>{{ token.shape }}</dd></div>
                 </dl>
-                <span v-else>{{ token.value }}</span>
-              </span>
+              </div>
             </li>
           </ul>
         </details>

@@ -1,4 +1,5 @@
 <script setup>
+import { ArrowLeft, ArrowRight } from '@lucide/vue'
 import { PaginationEllipsis, PaginationList, PaginationListItem, PaginationNext, PaginationPrev, PaginationRoot } from 'reka-ui'
 
 defineProps({
@@ -22,12 +23,12 @@ const emit = defineEmits(['update:page'])
     @update:page="emit('update:page', $event)"
   >
     <PaginationList v-slot="{ items }" class="ds-pagination__list">
-      <PaginationPrev class="ds-pagination__item" aria-label="Previous page">←</PaginationPrev>
+      <PaginationPrev class="ds-pagination__item" aria-label="Previous page"><ArrowLeft :size="18" aria-hidden="true" /></PaginationPrev>
       <template v-for="(item, index) in items" :key="item.type === 'page' ? item.value : `ellipsis-${index}`">
         <PaginationListItem v-if="item.type === 'page'" class="ds-pagination__item" :value="item.value">{{ item.value }}</PaginationListItem>
         <PaginationEllipsis v-else class="ds-pagination__ellipsis" :index="index">…</PaginationEllipsis>
       </template>
-      <PaginationNext class="ds-pagination__item" aria-label="Next page">→</PaginationNext>
+      <PaginationNext class="ds-pagination__item" aria-label="Next page"><ArrowRight :size="18" aria-hidden="true" /></PaginationNext>
     </PaginationList>
   </PaginationRoot>
 </template>

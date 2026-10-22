@@ -14,8 +14,8 @@ const emit = defineEmits(['update:modelValue'])
 </script>
 
 <template>
-  <span class="ds-input-shell" :class="{ 'ds-input-shell--with-icon': icon }">
-    <span v-if="icon" class="ds-input-shell__icon" aria-hidden="true">{{ icon }}</span>
+  <span class="ds-input-shell" :class="{ 'ds-input-shell--with-icon': icon || $slots.icon }">
+    <span v-if="icon || $slots.icon" class="ds-input-shell__icon" aria-hidden="true"><slot name="icon">{{ icon }}</slot></span>
     <input
       :id="id"
       class="ds-input"

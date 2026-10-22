@@ -12,9 +12,9 @@ import PlaygroundTypography from '../playground/PlaygroundTypography.vue'
 import { PLAYGROUND_CATEGORIES } from '../playground/componentCatalog.js'
 import {
   COMPONENT_SIZES,
-  COMPONENT_TOKEN_MAP,
   COMPONENT_VARIANTS,
   DEFAULT_INSPECTOR_TOKENS,
+  getComponentTokenNames,
   getInspectorTokenCategory,
   getRadiusShapeLabel,
 } from '../../utils/componentInspector.js'
@@ -88,32 +88,34 @@ function resolveColor(element, name) {
 function readSelection(element) {
   const component = element.dataset.dsComponent
   const style = getComputedStyle(element)
-  const tokenNames = COMPONENT_TOKEN_MAP[component] ?? DEFAULT_INSPECTOR_TOKENS
+  const variant = element.dataset.dsVariant || 'default'
+  const tokenNames = getComponentTokenNames(component, variant) ?? DEFAULT_INSPECTOR_TOKENS
   return {
     component,
-    variant: element.dataset.dsVariant || 'default',
+    variant,
     size: element.dataset.dsSize || 'default',
     state: element.dataset.dsState || element.dataset.state || (element.disabled ? 'disabled' : 'default'),
     connected: element.isConnected,
     tokens: tokenNames.map(name => {
       const category = getInspectorTokenCategory(name)
       const fallback = style.getPropertyValue(name).trim() || '—'
+      const source = String(props.cssVariables[name] ?? fallback).trim()
       if (category === 'color') {
         const resolved = resolveColor(element, name)
-        return { name, category, value: resolved.value, swatch: resolved.color }
+        return { name, category, cssValue: source, value: resolved.value, swatch: resolved.color }
       }
-      const source = props.cssVariables[name] ?? fallback
       const value = resolveTokenReference(name, fallback)
       if (category === 'radius') {
         return {
           name,
           category,
+          cssValue: source,
           value,
           reference: String(source).match(/var\((--[^)]+)\)/)?.[1] ?? 'Direct value',
           shape: getRadiusShapeLabel(component, value),
         }
       }
-      return { name, category, value }
+      return { name, category, cssValue: source, value }
     }),
   }
 }

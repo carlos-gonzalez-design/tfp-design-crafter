@@ -1,3 +1,10 @@
+import {
+  getAccessibleTextColor,
+  getPrimaryColorRoles,
+  getPrimaryColorScale,
+  normalizeHexColor,
+} from './colorScale.js'
+
 // One transformation feeds the scoped canvas, UI Kit and CSS export.
 export const SPACING_SCALE = Object.freeze([
   { name: 'none', value: 0 },
@@ -210,7 +217,7 @@ export function getAppliedSpacing(density) {
 }
 
 const FOUNDATION_TOKEN_FILTERS = Object.freeze({
-  colors: name => name.startsWith('--ds-color-') || name.startsWith('--ds-button-on-'),
+  colors: name => name.startsWith('--color-') || name.startsWith('--ds-color-'),
   typography: name => name.startsWith('--ds-font-')
     || name.startsWith('--ds-text-')
     || name.startsWith('--ds-line-height-')
@@ -227,17 +234,23 @@ export function getFoundationTokens(cssVariables, foundation) {
   return Object.fromEntries(Object.entries(cssVariables).filter(([name]) => matchesFoundation(name)))
 }
 
-function onAccent(hex) {
-  const channels = hex.slice(1).match(/../g).map(channel => {
-    const value = parseInt(channel, 16) / 255
-    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
-  })
-  const luminance = channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722
-  return (luminance + 0.05) / 0.05 >= 1.05 / (luminance + 0.05) ? '#000000' : '#ffffff'
-}
-
 export function createDesignTokens(foundations) {
   const { colors, typography, spacing, radius } = foundations
+  const normalizedColors = {
+    primary: normalizeHexColor(colors?.primary) ?? '#4353FF',
+    background: normalizeHexColor(colors?.background) ?? '#F7F7F8',
+    surface: normalizeHexColor(colors?.surface) ?? '#FFFFFF',
+    text: normalizeHexColor(colors?.text) ?? '#18181B',
+    success: normalizeHexColor(colors?.success) ?? '#16794A',
+    warning: normalizeHexColor(colors?.warning) ?? '#8A5A00',
+    error: normalizeHexColor(colors?.error) ?? '#C83A3A',
+    info: normalizeHexColor(colors?.info) ?? '#2563EB',
+  }
+  const primaryScale = getPrimaryColorScale(normalizedColors.primary)
+  const primaryRoles = getPrimaryColorRoles(primaryScale, normalizedColors)
+  const textReference = choice => choice.hex === '#FFFFFF'
+    ? 'var(--color-neutral-white)'
+    : 'var(--color-neutral-black)'
   const density = normalizeDensity(spacing.density)
   const densityConfig = DENSITY_CONFIG[density]
   const typeScale = getTypographyScale(typography)
@@ -250,41 +263,75 @@ export function createDesignTokens(foundations) {
   const surfaceInnerToken = ({ sharp: 'none', subtle: 'none', rounded: 'lg', soft: 'xl' })[cardRadius.id]
 
   return {
-    '--ds-color-primary': colors.primary,
-    '--ds-color-secondary': colors.secondary,
-    '--ds-color-background': colors.background,
-    '--ds-color-surface': colors.surface,
-    '--ds-color-text': colors.text,
+    '--color-primary-source': normalizedColors.primary,
+    ...Object.fromEntries(primaryScale.map(tone => [tone.token, tone.hex])),
+    '--color-neutral-background': normalizedColors.background,
+    '--color-neutral-surface': normalizedColors.surface,
+    '--color-neutral-text': normalizedColors.text,
+    '--color-neutral-muted': 'color-mix(in srgb, var(--color-neutral-text) 72%, var(--color-neutral-surface))',
+    '--color-neutral-border': 'color-mix(in srgb, var(--color-neutral-text) 18%, var(--color-neutral-surface))',
+    '--color-neutral-white': '#FFFFFF',
+    '--color-neutral-black': '#000000',
+    '--color-state-success': normalizedColors.success,
+    '--color-state-warning': normalizedColors.warning,
+    '--color-state-error': normalizedColors.error,
+    '--color-state-info': normalizedColors.info,
+    '--ds-color-background': 'var(--color-neutral-background)',
+    '--ds-color-surface': 'var(--color-neutral-surface)',
+    '--ds-color-text': 'var(--color-neutral-text)',
     '--ds-color-text-muted': 'color-mix(in srgb, var(--ds-color-text) 72%, var(--ds-color-surface))',
     '--ds-color-border': 'color-mix(in srgb, var(--ds-color-text) 18%, var(--ds-color-surface))',
-    '--ds-button-on-accent': onAccent(colors.primary),
-    '--ds-button-on-secondary': onAccent(colors.secondary),
     '--ds-color-bg-canvas-default': 'var(--ds-color-background)',
     '--ds-color-bg-surface-default': 'var(--ds-color-surface)',
     '--ds-color-bg-surface-muted': 'color-mix(in srgb, var(--ds-color-text) 4%, var(--ds-color-surface))',
-    '--ds-color-bg-fill-primary-default': 'var(--ds-color-primary)',
-    '--ds-color-bg-fill-primary-hover': 'color-mix(in srgb, var(--ds-color-primary) 88%, var(--ds-color-text))',
-    '--ds-color-bg-fill-primary-active': 'color-mix(in srgb, var(--ds-color-primary) 78%, var(--ds-color-text))',
-    '--ds-color-bg-fill-secondary-default': 'var(--ds-color-secondary)',
-    '--ds-color-bg-fill-secondary-hover': 'color-mix(in srgb, var(--ds-color-secondary) 88%, var(--ds-color-text))',
-    '--ds-color-bg-fill-secondary-active': 'color-mix(in srgb, var(--ds-color-secondary) 78%, var(--ds-color-text))',
-    '--ds-color-bg-fill-danger-default': 'var(--ds-color-secondary)',
-    '--ds-color-bg-fill-danger-hover': 'color-mix(in srgb, var(--ds-color-secondary) 82%, var(--ds-color-text))',
+    '--ds-color-bg-fill-primary-default': `var(--color-primary-${primaryRoles.action})`,
+    '--ds-color-bg-fill-primary-hover': `var(--color-primary-${primaryRoles.actionHover})`,
+    '--ds-color-bg-fill-primary-active': `var(--color-primary-${primaryRoles.actionActive})`,
+    '--ds-color-bg-fill-danger-default': 'var(--color-state-error)',
+    '--ds-color-bg-fill-danger-hover': 'color-mix(in srgb, var(--color-state-error) 84%, var(--color-neutral-black))',
     '--ds-color-text-primary-default': 'var(--ds-color-text)',
     '--ds-color-text-secondary-default': 'var(--ds-color-text-muted)',
-    '--ds-color-text-on-primary': 'var(--ds-button-on-accent)',
-    '--ds-color-text-on-secondary': 'var(--ds-button-on-secondary)',
-    '--ds-color-text-danger-default': 'color-mix(in srgb, var(--ds-color-secondary) 78%, var(--ds-color-text))',
+    '--ds-color-text-on-primary': textReference(primaryRoles.actionText),
+    '--ds-color-text-danger-default': 'var(--color-state-error)',
     '--ds-color-border-primary-default': 'var(--ds-color-border)',
-    '--ds-color-border-primary-focus': 'var(--ds-color-primary)',
+    '--ds-color-border-primary-focus': `var(--color-primary-${primaryRoles.focus})`,
     '--ds-color-border-secondary-default': 'color-mix(in srgb, var(--ds-color-text) 30%, var(--ds-color-surface))',
-    '--ds-color-border-danger-default': 'var(--ds-color-secondary)',
-    '--ds-color-button-primary-default': 'var(--ds-color-bg-fill-primary-default)',
-    '--ds-color-button-primary-hover': 'var(--ds-color-bg-fill-primary-hover)',
-    '--ds-color-button-primary-active': 'var(--ds-color-bg-fill-primary-active)',
-    '--ds-color-button-secondary-default': 'var(--ds-color-bg-fill-secondary-default)',
-    '--ds-color-button-secondary-hover': 'var(--ds-color-bg-fill-secondary-hover)',
-    '--ds-color-button-secondary-active': 'var(--ds-color-bg-fill-secondary-active)',
+    '--ds-color-border-danger-default': 'var(--color-state-error)',
+    '--ds-color-button-primary-background-default': 'var(--ds-color-bg-fill-primary-default)',
+    '--ds-color-button-primary-background-hover': 'var(--ds-color-bg-fill-primary-hover)',
+    '--ds-color-button-primary-background-active': 'var(--ds-color-bg-fill-primary-active)',
+    '--ds-color-button-primary-text-default': textReference(primaryRoles.actionText),
+    '--ds-color-button-primary-text-hover': textReference(primaryRoles.actionHoverText),
+    '--ds-color-button-primary-text-active': textReference(primaryRoles.actionActiveText),
+    '--ds-color-button-primary-default': 'var(--ds-color-button-primary-background-default)',
+    '--ds-color-button-primary-hover': 'var(--ds-color-button-primary-background-hover)',
+    '--ds-color-button-primary-active': 'var(--ds-color-button-primary-background-active)',
+    '--ds-color-button-secondary-background-default': 'var(--color-neutral-surface)',
+    '--ds-color-button-secondary-background-hover': 'var(--ds-color-bg-surface-muted)',
+    '--ds-color-button-secondary-background-active': 'color-mix(in srgb, var(--color-neutral-text) 9%, var(--color-neutral-surface))',
+    '--ds-color-button-secondary-border-default': 'var(--ds-color-border-secondary-default)',
+    '--ds-color-button-secondary-text-default': 'var(--ds-color-text-primary-default)',
+    '--ds-color-button-secondary-default': 'var(--ds-color-button-secondary-background-default)',
+    '--ds-color-button-secondary-hover': 'var(--ds-color-button-secondary-background-hover)',
+    '--ds-color-button-secondary-active': 'var(--ds-color-button-secondary-background-active)',
+    '--ds-color-button-tertiary-text-default': `var(--color-primary-${primaryRoles.link})`,
+    '--ds-color-button-tertiary-background-hover': `var(--color-primary-${primaryRoles.soft})`,
+    '--ds-color-link-default': `var(--color-primary-${primaryRoles.link})`,
+    '--ds-color-link-hover': `var(--color-primary-${primaryRoles.linkHover})`,
+    '--ds-color-badge-brand-background': `var(--color-primary-${primaryRoles.soft})`,
+    '--ds-color-badge-brand-text': `var(--color-primary-${primaryRoles.softText})`,
+    '--ds-color-selection-background': `var(--color-primary-${primaryRoles.soft})`,
+    '--ds-color-selection-border': `var(--color-primary-${primaryRoles.focus})`,
+    '--ds-color-selection-text': `var(--color-primary-${primaryRoles.link})`,
+    '--ds-color-focus-ring': `var(--color-primary-${primaryRoles.focus})`,
+    '--ds-color-status-success': 'var(--color-state-success)',
+    '--ds-color-status-warning': 'var(--color-state-warning)',
+    '--ds-color-status-error': 'var(--color-state-error)',
+    '--ds-color-status-info': 'var(--color-state-info)',
+    '--ds-color-text-on-success': textReference(getAccessibleTextColor(normalizedColors.success)),
+    '--ds-color-text-on-warning': textReference(getAccessibleTextColor(normalizedColors.warning)),
+    '--ds-color-text-on-error': textReference(getAccessibleTextColor(normalizedColors.error)),
+    '--ds-color-text-on-info': textReference(getAccessibleTextColor(normalizedColors.info)),
     '--ds-color-control-background-default': 'var(--ds-color-bg-surface-default)',
     '--ds-color-control-background-hover': 'var(--ds-color-bg-surface-muted)',
     '--ds-color-control-border-default': 'var(--ds-color-border-secondary-default)',
@@ -375,7 +422,7 @@ export function createDesignTokens(foundations) {
   }
 }
 
-const PRIMITIVE_TOKEN_PATTERN = /--ds-(?:color-(?:primary|secondary|background|surface|text)$|font-size-(?:2xs|xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl)$|space-(?:none|4xs|3xs|2xs|xs|sm|md|lg|xl|2xl|3xl)$|radius-(?:none|sm|md|lg|xl|2xl|full|circle)$)/
+const PRIMITIVE_TOKEN_PATTERN = /--(?:color-(?:primary-(?:source|50|100|200|300|400|500|600|700|800|900|950)|neutral-|state-)|ds-(?:color-(?:background|surface|text)$|font-size-(?:2xs|xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl)$|space-(?:none|4xs|3xs|2xs|xs|sm|md|lg|xl|2xl|3xl)$|radius-(?:none|sm|md|lg|xl|2xl|full|circle)$))/
 const COMPONENT_TOKEN_PATTERN = /--ds-(?:color-(?:button|control)-|font-(?:size|weight)-(?:button|control|badge)-|spacing-(?:button|card)-|radius-(?:button|card|input|badge|checkbox|switch|progress|tooltip|overlay)-|(?:button|card|badge)-)/
 
 export function getDesignTokenLevel(name) {
@@ -383,7 +430,7 @@ export function getDesignTokenLevel(name) {
 }
 
 function getTokenType(name) {
-  if (name.includes('color') || name.includes('on-accent') || name.includes('on-secondary')) return 'color'
+  if (name.includes('color')) return 'color'
   if (name.includes('font') || name.includes('text-') || name.includes('line-height') || name.includes('letter-spacing')) return 'typography'
   if (name.includes('spacing') || name.includes('space-') || name.includes('padding') || name.includes('gap')) return 'dimension'
   if (name.includes('radius')) return 'borderRadius'
