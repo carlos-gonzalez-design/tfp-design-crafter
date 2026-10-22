@@ -69,6 +69,12 @@ try {
   await waitFor('.landing-hero')
   await waitFor('.live-demo__card')
 
+  assert.equal(await evaluate('getComputedStyle(document.documentElement).getPropertyValue("--dc-color-brand").trim()'), '#635bff')
+  assert.equal(await evaluate('getComputedStyle(document.querySelector(".landing-hero .landing-link--brand")).backgroundColor'), 'rgb(99, 91, 255)')
+  assert.equal(await evaluate('getComputedStyle(document.querySelector(".landing-hero .landing-link--brand")).color'), 'rgb(255, 255, 255)')
+  assert.equal(await evaluate('Array.from(document.querySelectorAll(".landing-brand img")).length'), 2)
+  assert.equal(await evaluate('Array.from(document.querySelectorAll(".landing-brand img")).every(image=>image.getAttribute("src").endsWith("/images/logo-design-crafter.svg"))'), true)
+  assert.equal(await evaluate('Array.from(document.querySelectorAll(".landing-brand__mark")).length'), 0)
   assert.deepEqual(await evaluate('Array.from(document.querySelectorAll("h1 > *"), element => element.textContent.trim())'), ['Craft your system.', 'Shape your design.'])
   assert.equal(await evaluate('document.querySelectorAll(".foundation-tile").length'), 4)
   assert.equal(await evaluate('document.querySelectorAll(`a[data-app-link][href="/app"]`).length >= 3'), true)
@@ -128,6 +134,7 @@ try {
     await call('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: false })
     await pause()
     assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), `Landing overflow at ${width}px`)
+    assert.ok(await evaluate('Array.from(document.querySelectorAll(".landing-brand img")).every(image=>image.getBoundingClientRect().width>0&&image.getBoundingClientRect().width<=innerWidth)'), `Landing logo sizing at ${width}px`)
   }
   assert.equal(await evaluate('document.querySelector(".dashboard-scroll-showcase").classList.contains("dashboard-scroll-showcase--scroll-driven")'), false)
   assert.notEqual(await evaluate('getComputedStyle(document.querySelector(".dashboard-scroll-showcase__sticky")).position'), 'sticky')

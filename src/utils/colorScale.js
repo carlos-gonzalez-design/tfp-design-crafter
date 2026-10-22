@@ -1,3 +1,5 @@
+import { getBrandColor } from './brand.js'
+
 export const PRIMARY_TONE_NAMES = Object.freeze(['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'])
 
 const TONE_LIGHTNESS = Object.freeze({
@@ -71,6 +73,11 @@ function srgbToOklch(value) {
   return { lightness, chroma, hue }
 }
 
+export function getOklchLightness(value) {
+  const normalized = normalizeHexColor(value)
+  return normalized ? srgbToOklch(normalized).lightness : 0.56
+}
+
 function oklchToLinearSrgb(lightness, chroma, hue) {
   const a = chroma * Math.cos(hue)
   const b = chroma * Math.sin(hue)
@@ -115,8 +122,8 @@ function gamutMappedOklch(lightness, chroma, hue) {
   }
 }
 
-export function getPrimaryColorScale(source) {
-  const normalizedSource = normalizeHexColor(source) ?? '#4353FF'
+export function getPrimaryColorScale(source, exactToneName = '') {
+  const normalizedSource = normalizeHexColor(source) ?? getBrandColor()
   const origin = srgbToOklch(normalizedSource)
   return PRIMARY_TONE_NAMES.map(name => {
     const lightness = TONE_LIGHTNESS[name]
@@ -124,11 +131,24 @@ export function getPrimaryColorScale(source) {
     return {
       name,
       token: `--color-primary-${name}`,
-      hex: mapped.hex,
+      hex: name === String(exactToneName) ? normalizedSource : mapped.hex,
       lightness,
-      chroma: mapped.chroma,
+      chroma: name === String(exactToneName) ? origin.chroma : mapped.chroma,
     }
   })
+}
+
+export function getRecommendedPrimaryTone(scale, source, background = '#FFFFFF', minimum = 4.5) {
+  const sourceLightness = getOklchLightness(source)
+  const candidates = scale.map(tone => {
+    return { ...tone, ratio: getContrastRatio(tone.hex, background) }
+  })
+  const passingTones = candidates.filter(tone => tone.ratio >= minimum)
+  const eligible = passingTones.length ? passingTones : candidates
+  return [...eligible].sort((first, second) => (
+    Math.abs(first.lightness - sourceLightness) - Math.abs(second.lightness - sourceLightness)
+    || second.ratio - first.ratio
+  ))[0]
 }
 
 export function getRelativeLuminance(value) {
@@ -176,7 +196,7 @@ function toneAtOffset(scale, index, offset, fallback) {
   return scale[target] ?? fallback
 }
 
-export function getPrimaryColorRoles(scale, colors = {}) {
+export function getPrimaryColorRoles(scale, colors = {}, primaryTone = 'auto') {
   const surface = normalizeHexColor(colors.surface) ?? '#FFFFFF'
   const darkSurface = getRelativeLuminance(surface) < 0.22
   const actionCandidates = darkSurface
@@ -198,7 +218,7 @@ export function getPrimaryColorRoles(scale, colors = {}) {
     : ['800', '900', '950', '700', '600', '500', '400', '300', '200', '100', '50'])
   const focus = chooseTone(scale, surface, 3, actionCandidates)
 
-  return {
+  const roles = {
     action: action.name,
     actionHover: hover.name,
     actionActive: active.name,
@@ -212,4 +232,36 @@ export function getPrimaryColorRoles(scale, colors = {}) {
     softText: softText.name,
     focus: focus.name,
   }
+
+  const selectedToneIndex = scale.findIndex(tone => tone.name === String(primaryTone))
+  if (selectedToneIndex < 0) return roles
+  const offset = selectedToneIndex - actionIndex
+  const shift = name => {
+    const index = scale.findIndex(tone => tone.name === name)
+    return scale[Math.max(0, Math.min(scale.length - 1, index + offset))]
+  }
+  const selectedAction = scale[selectedToneIndex]
+  const selectedHover = shift(roles.actionHover)
+  const selectedActive = shift(roles.actionActive)
+  const selectedLink = shift(roles.link)
+  const selectedLinkHover = shift(roles.linkHover)
+  const selectedSoft = shift(roles.soft)
+  const selectedSoftHover = shift(roles.softHover)
+  const selectedSoftText = shift(roles.softText)
+  const selectedFocus = shift(roles.focus)
+  return {
+    action: selectedAction.name,
+    actionHover: selectedHover.name,
+    actionActive: selectedActive.name,
+    actionText: getAccessibleTextColor(selectedAction.hex),
+    actionHoverText: getAccessibleTextColor(selectedHover.hex),
+    actionActiveText: getAccessibleTextColor(selectedActive.hex),
+    link: selectedLink.name,
+    linkHover: selectedLinkHover.name,
+    soft: selectedSoft.name,
+    softHover: selectedSoftHover.name,
+    softText: selectedSoftText.name,
+    focus: selectedFocus.name,
+  }
 }
+

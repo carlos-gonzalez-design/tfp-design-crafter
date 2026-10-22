@@ -10,12 +10,6 @@
     font-family: var(--dc-font-family-sans);
   }
 
-  .dashboard--preview-expanded .preview-area {
-    padding: clamp(1.5rem, 4vw, 4.5rem);
-    border-left: 0;
-    background: var(--dc-color-canvas);
-  }
-
   .preview-area__heading,
   .generated-css__heading {
     display: flex;
@@ -39,17 +33,13 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4375rem;
-    color: var(--dc-color-success);
     font-family: var(--dc-font-family-mono);
     font-size: var(--dc-font-size-10);
-
-    & span {
-      width: 0.4375rem;
-      height: 0.4375rem;
-      border-radius: 50%;
-      background: var(--dc-color-success);
-    }
+    color: var(--dc-color-success);
   }
+
+  .preview-area__status-dot { width: 0.4375rem; height: 0.4375rem; border-radius: 50%; background: currentColor; }
+  .preview-area__status--saving { color: var(--dc-color-warning); }
 
   @media (max-width: 30rem) {
     .preview-area__heading { align-items: flex-start; }

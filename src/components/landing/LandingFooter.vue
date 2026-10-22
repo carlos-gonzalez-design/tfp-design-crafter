@@ -3,8 +3,7 @@
     <div class="landing-container landing-footer__inner">
       <div>
         <a class="landing-brand landing-brand--light" href="#main-content">
-          <span class="landing-brand__mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-          <span>Design Crafter</span>
+          <img src="/images/logo-design-crafter.svg" alt="Design Crafter" />
         </a>
         <p>A Visual Design Playground</p>
       </div>

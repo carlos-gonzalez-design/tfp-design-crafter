@@ -8,8 +8,7 @@ const menuOpen = ref(false)
   <header class="landing-header">
     <div class="landing-header__inner">
       <a class="landing-brand" href="#main-content" aria-label="Design Crafter home" @click="menuOpen = false">
-        <span class="landing-brand__mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-        <span>Design Crafter</span>
+        <img src="/images/logo-design-crafter.svg" alt="Design Crafter" />
       </a>
       <button
         class="landing-header__menu-button"

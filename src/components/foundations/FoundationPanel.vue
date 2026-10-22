@@ -1,11 +1,12 @@
 <script setup>
+import { Settings } from '@lucide/vue'
 import { FOUNDATION_SECTIONS } from '../../utils/foundationConfig.js'
 
 defineProps({
   activeFoundation: { type: String, default: null },
 })
 
-const emit = defineEmits(['select'])
+const emit = defineEmits(['select', 'settings'])
 </script>
 
 <template>
@@ -32,5 +33,8 @@ const emit = defineEmits(['select'])
         @click="emit('select', section.id)"
       >{{ section.label }}</button>
     </nav>
+    <div class="foundation-panel__actions" aria-label="Global actions">
+      <button class="foundation-action" type="button" @click="emit('settings')"><Settings :size="16" aria-hidden="true" /><span>Settings</span></button>
+    </div>
   </aside>
 </template>

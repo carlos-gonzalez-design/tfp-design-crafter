@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import DcButton from '../ui/DcButton.vue'
 import DcInput from '../ui/DcInput.vue'
 import DcSelect from '../ui/DcSelect.vue'
@@ -14,6 +14,7 @@ import {
   getContrastLabel,
   getContrastRatio,
   getPrimaryColorScale,
+  getRecommendedPrimaryTone,
   normalizeHexColor,
 } from '../../utils/colorScale.js'
 import {
@@ -44,7 +45,14 @@ const activeTab = ref('edit')
 const showFullCss = ref(false)
 const primaryHexDraft = ref(props.foundations.colors.primary)
 const primaryHexError = ref('')
-const contrastTextMode = ref('auto')
+const contrastTextMode = computed({
+  get: () => props.foundations.colors.foregroundMode ?? 'auto',
+  set: value => { props.foundations.colors.foregroundMode = value },
+})
+const foregroundUsePrimary = computed({
+  get: () => Boolean(props.foundations.colors.foregroundUsePrimary),
+  set: value => { props.foundations.colors.foregroundUsePrimary = value },
+})
 const baseSizeDraft = ref(String(props.foundations.typography.baseSize))
 const baseSizeError = ref('')
 const sampleText = ref('Design for every scale.')
@@ -56,9 +64,9 @@ const fontOptions = [
   { value: "'Trebuchet MS', sans-serif", label: 'Trebuchet MS' },
 ]
 const contrastTextOptions = [
-  { value: 'auto', label: 'Automático' },
-  { value: 'white', label: 'Blanco' },
-  { value: 'black', label: 'Negro' },
+  { value: 'auto', label: 'Auto' },
+  { value: 'white', label: 'White' },
+  { value: 'black', label: 'Black' },
 ]
 const neutralColorTokens = [
   { name: '--color-neutral-text', label: 'Text' },
@@ -92,14 +100,30 @@ const appliedSpacing = computed(() => {
   const assignments = getAppliedSpacing(props.foundations.spacing.density)
   return appliedSpacingFields.map(field => ({ ...field, ...assignments[field.key] }))
 })
-const primaryColorScale = computed(() => getPrimaryColorScale(props.foundations.colors.primary))
-const contrastSamples = computed(() => primaryColorScale.value.map(tone => {
-  const automatic = getAccessibleTextColor(tone.hex)
-  const foreground = contrastTextMode.value === 'white'
+const primaryColorScale = computed(() => getPrimaryColorScale(props.foundations.colors.primary, props.foundations.colors.primaryTone))
+const recommendedTone = computed(() => {
+  return getRecommendedPrimaryTone(primaryColorScale.value, props.foundations.colors.primary, props.foundations.colors.background)
+})
+const recommendedToneRatio = computed(() => getContrastRatio(recommendedTone.value.hex, props.foundations.colors.background))
+const selectedPrimaryTone = computed(() => primaryColorScale.value.find(tone => tone.name === String(props.foundations.colors.primaryTone)) ?? recommendedTone.value)
+const effectiveForeground = computed(() => foregroundUsePrimary.value
+  ? props.foundations.colors.primary
+  : contrastTextMode.value === 'white'
     ? '#FFFFFF'
     : contrastTextMode.value === 'black'
       ? '#000000'
-      : automatic.hex
+      : recommendedTone.value.hex)
+const effectiveForegroundRatio = computed(() => getContrastRatio(effectiveForeground.value, props.foundations.colors.background))
+const effectiveForegroundCompliant = computed(() => effectiveForegroundRatio.value >= 4.5)
+const contrastSamples = computed(() => primaryColorScale.value.map(tone => {
+  const automatic = getAccessibleTextColor(tone.hex)
+  const foreground = foregroundUsePrimary.value
+    ? props.foundations.colors.primary
+    : contrastTextMode.value === 'white'
+      ? '#FFFFFF'
+      : contrastTextMode.value === 'black'
+        ? '#000000'
+        : automatic.hex
   const ratio = getContrastRatio(tone.hex, foreground)
   return {
     ...tone,
@@ -131,19 +155,13 @@ function resolveTokenValue(name, visited = new Set()) {
   return reference ? resolveTokenValue(reference, visited) : value
 }
 
-function tokenUnit(value) {
-  return String(value).trim().match(/(?:\d|\.)([a-z%]+)$/i)?.[1] ?? '—'
-}
-
 const tokenRows = computed(() => Object.entries(foundationTokens.value).map(([name, value]) => {
   const effective = resolveTokenValue(name)
   return {
     name,
     value,
-    reference: typeof value === 'string' ? value.match(/var\((--[^)]+)\)/)?.[1] ?? 'Direct value' : 'Direct value',
     level: getDesignTokenLevel(name),
     effective,
-    unit: tokenUnit(effective),
   }
 }))
 const tokenGroups = computed(() => {
@@ -163,6 +181,20 @@ const tokenGroups = computed(() => {
   ].filter(group => group.rows.length)
 })
 
+function mixHex(first, second, firstWeight = 0.18) {
+  const toChannels = value => normalizeHexColor(value)?.slice(1).match(/.{2}/g)?.map(channel => Number.parseInt(channel, 16))
+  const firstChannels = toChannels(first)
+  const secondChannels = toChannels(second)
+  if (!firstChannels || !secondChannels) return first
+  return `#${firstChannels.map((channel, index) => Math.round(channel * firstWeight + secondChannels[index] * (1 - firstWeight)).toString(16).padStart(2, '0')).join('').toUpperCase()}`
+}
+
+const borderMix = computed(() => ({
+  text: resolveTokenValue('--color-neutral-text'),
+  surface: resolveTokenValue('--color-neutral-surface'),
+  value: mixHex(resolveTokenValue('--color-neutral-text'), resolveTokenValue('--color-neutral-surface')),
+}))
+
 watch(() => props.activeFoundation, () => {
   showFullCss.value = false
 })
@@ -178,13 +210,45 @@ watch(() => props.foundations.colors.primary, value => {
   primaryHexError.value = ''
 })
 
-function setPrimaryColor(value) {
+function setPrimaryColor(value, selectedTone = 'auto') {
   const normalized = normalizeHexColor(value)
   if (!normalized) return false
   props.foundations.colors.primary = normalized
+  props.foundations.colors.primaryTone = selectedTone
   primaryHexDraft.value = normalized
   primaryHexError.value = ''
   return true
+}
+
+function selectPrimaryTone(name) {
+  const tone = primaryColorScale.value.find(item => item.name === String(name))
+  if (!tone) return
+  setPrimaryColor(tone.hex, name)
+}
+
+function setUsePrimaryForeground(event) {
+  foregroundUsePrimary.value = event.target.checked
+  contrastTextMode.value = 'auto'
+}
+
+async function navigateForegroundTones(event, index) {
+  if (event.key === ' ' || event.key === 'Enter') {
+    event.preventDefault()
+    selectPrimaryTone(primaryColorScale.value[index].name)
+    return
+  }
+  if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return
+  event.preventDefault()
+  const tones = primaryColorScale.value
+  const nextIndex = event.key === 'Home'
+    ? 0
+    : event.key === 'End'
+      ? tones.length - 1
+      : (index + (['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : -1) + tones.length) % tones.length
+  const colorScale = event.currentTarget.closest('.foundation-color-scale')
+  selectPrimaryTone(tones[nextIndex].name)
+  await nextTick()
+  colorScale?.querySelectorAll('.foundation-color-sample__tone')[nextIndex]?.focus()
 }
 
 function updatePrimaryPicker(event) {
@@ -194,7 +258,7 @@ function updatePrimaryPicker(event) {
 function updatePrimaryHex(event) {
   primaryHexDraft.value = event.target.value
   if (!setPrimaryColor(event.target.value)) {
-    primaryHexError.value = 'Introduce un hexadecimal válido, por ejemplo #4353FF.'
+    primaryHexError.value = 'Introduce un hexadecimal válido, por ejemplo #635BFF.'
   }
 }
 
@@ -299,32 +363,45 @@ function navigateRadiusOptions(event, category, index) {
                 <p id="primary-color-error" class="foundation-primary-control__error" aria-live="polite">{{ primaryHexError }}</p>
 
                 <div class="foundation-contrast-toolbar">
-                  <div><strong>Color de la letra</strong><p>Solo modifica la comprobación de estas muestras.</p></div>
-                  <div class="foundation-contrast-toolbar__options" role="group" aria-label="Color de la letra para comprobar contraste">
-                    <button
-                      v-for="option in contrastTextOptions"
-                      :key="option.value"
-                      type="button"
-                      :aria-pressed="contrastTextMode === option.value"
-                      @click="contrastTextMode = option.value"
-                    >{{ option.label }}</button>
+                  <div><strong>Foreground</strong><p>Select the foreground color and compare it with the current background.</p></div>
+                  <div class="foundation-foreground-controls">
+                    <label class="foundation-foreground-toggle"><input :checked="foregroundUsePrimary" type="checkbox" role="switch" aria-label="Use primary color" @change="setUsePrimaryForeground" /><span class="foundation-foreground-toggle__track" aria-hidden="true"><span></span></span><span>Use primary color</span></label>
+                    <div class="foreground-control foundation-contrast-toolbar__options" role="radiogroup" aria-label="Text color for contrast samples">
+                      <label v-for="option in contrastTextOptions" :key="option.value" class="foundation-contrast-toolbar__option">
+                        <input v-model="contrastTextMode" type="radio" name="contrast-text-mode" :value="option.value" :disabled="foregroundUsePrimary" />
+                        <span>{{ option.label }}</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
 
-                <div class="foundation-color-scale" aria-label="Primary color scale and normal-text contrast">
-                  <article v-for="tone in contrastSamples" :key="tone.name" class="foundation-color-sample">
-                    <header><strong>{{ tone.name }}</strong><code>{{ tone.token }}</code></header>
-                    <div class="foundation-color-sample__swatch" :style="{ backgroundColor: tone.hex, color: tone.foreground }" aria-hidden="true">A</div>
-                    <div class="foundation-color-sample__result">
-                      <code>{{ tone.hex }}</code>
-                      <div class="foundation-contrast-result">
-                        <strong class="foundation-contrast-result__ratio">{{ tone.ratioLabel }}</strong>
-                        <span
-                          class="foundation-contrast-result__status"
-                          :class="tone.passesContrast ? 'foundation-contrast-result__status--pass' : 'foundation-contrast-result__status--fail'"
-                        >{{ tone.compliance }}</span>
+                <div class="foundation-foreground-current" aria-live="polite">
+                  <span class="foundation-foreground-current__swatch" :style="{ backgroundColor: effectiveForeground }" aria-hidden="true"></span>
+                  <span><small>Selected foreground</small><strong>{{ effectiveForeground }}</strong></span>
+                  <span class="foundation-contrast-result"><strong class="foundation-contrast-result__ratio">{{ effectiveForegroundRatio.toFixed(1).replace('.', ',') }}:1</strong><span class="foundation-contrast-result__status" :class="effectiveForegroundCompliant ? 'foundation-contrast-result__status--pass' : 'foundation-contrast-result__status--fail'">{{ effectiveForegroundCompliant ? getContrastLabel(effectiveForegroundRatio) : 'Does not meet AA' }}</span></span>
+                </div>
+
+                <div class="foundation-color-scale" role="radiogroup" aria-label="Choose a primary tone">
+                  <article v-for="(tone, index) in contrastSamples" :key="tone.name" role="none" class="foundation-color-sample" :class="{ 'foundation-color-sample--recommended': tone.name === recommendedTone.name, 'foundation-color-sample--selected': tone.name === selectedPrimaryTone.name }">
+                    <button class="foundation-color-sample__tone" type="button" role="radio" :aria-checked="tone.name === selectedPrimaryTone.name" :aria-label="`Set tone ${tone.name} as primary`" :tabindex="tone.name === selectedPrimaryTone.name ? 0 : -1" @click="selectPrimaryTone(tone.name)" @keydown="navigateForegroundTones($event, index)">
+                      <header><strong>{{ tone.name }}</strong><code>{{ tone.token }}</code></header>
+                      <div class="foundation-color-sample__swatch" :style="{ backgroundColor: tone.hex, color: tone.foreground }" aria-hidden="true">A</div>
+                      <div class="foundation-color-sample__result">
+                        <div v-if="tone.name === recommendedTone.name" class="foundation-color-sample__recommendation">
+                          <span>Recommended</span>
+                          <span>{{ recommendedToneRatio >= 4.5 ? getContrastLabel(recommendedToneRatio) : 'Below AA' }}</span>
+                        </div>
+                        <div v-if="tone.name === selectedPrimaryTone.name" class="foundation-color-sample__selection">Selected primary</div>
+                        <code>{{ tone.hex }}</code>
+                        <div class="foundation-contrast-result">
+                          <strong class="foundation-contrast-result__ratio">{{ tone.ratioLabel }}</strong>
+                          <span
+                            class="foundation-contrast-result__status"
+                            :class="tone.passesContrast ? 'foundation-contrast-result__status--pass' : 'foundation-contrast-result__status--fail'"
+                          >{{ tone.compliance }}</span>
+                        </div>
                       </div>
-                    </div>
+                    </button>
                   </article>
                 </div>
               </section>
@@ -332,10 +409,16 @@ function navigateRadiusOptions(event, category, index) {
               <section class="foundation-settings__section" aria-labelledby="neutral-colors-title">
                 <div class="foundation-settings__heading"><div><h3 id="neutral-colors-title">Neutrals</h3><p>Reading, surface and boundary colors remain stable.</p></div><span>{{ neutralColorTokens.length }} colors</span></div>
                 <div class="foundation-color-reference-list">
-                  <div v-for="token in neutralColorTokens" :key="token.name">
+                  <div v-for="token in neutralColorTokens" :key="token.name" :class="{ 'foundation-color-reference-list__derived': token.name === '--color-neutral-border' }">
                     <span :style="{ backgroundColor: resolveTokenValue(token.name) }" aria-hidden="true"></span>
                     <div><strong>{{ token.label }}</strong><code>{{ token.name }}</code></div>
-                    <code>{{ resolveTokenValue(token.name) }}</code>
+                    <code>{{ token.name === '--color-neutral-border' ? borderMix.value : resolveTokenValue(token.name) }}</code>
+                    <div v-if="token.name === '--color-neutral-border'" class="neutral-border-mix" aria-label="Text 18 percent mixed with Surface 82 percent">
+                      <span class="neutral-border-mix__swatch" :style="{ backgroundColor: borderMix.text }" aria-hidden="true"></span><span>18%</span><b aria-hidden="true">+</b>
+                      <span class="neutral-border-mix__swatch" :style="{ backgroundColor: borderMix.surface }" aria-hidden="true"></span><span>82%</span>
+                      <span class="neutral-border-mix__track" aria-hidden="true"><span></span><span></span></span>
+                      <small>Text 18% + Surface 82%</small>
+                    </div>
                   </div>
                 </div>
               </section>
@@ -446,7 +529,7 @@ function navigateRadiusOptions(event, category, index) {
                   <li v-for="token in SPACING_SCALE" :key="token.name" class="spacing-scale-preview__item">
                     <code>space-{{ token.name }}</code>
                     <span class="spacing-scale-preview__track" aria-hidden="true"><span :class="{ 'spacing-scale-preview__bar--zero': token.value === 0 }" :style="{ width: `${token.value / largestSpacing * 100}%` }"></span></span>
-                    <output>{{ token.value }}px</output>
+                    <output>{{ token.value === 0 ? 'None' : `${token.value}px` }}</output>
                   </li>
                 </ol>
               </section>
@@ -514,32 +597,22 @@ function navigateRadiusOptions(event, category, index) {
           <div class="foundation-tokens__intro"><div><h3 id="foundation-tokens-title">{{ activeSection.label }} tokens</h3><p>Live values derived from the same source used by Preview and generated CSS.</p></div><span>{{ tokenRows.length }} tokens</span></div>
           <p class="foundation-tokens__notice">Token names are read-only to keep CSS references synchronized.</p>
           <div class="foundation-tokens__table-wrap">
-            <table class="foundation-tokens__table" :class="{ 'foundation-tokens__table--radius': activeFoundation === 'radius' }">
+            <table class="foundation-tokens__table">
               <thead>
-                <tr v-if="activeFoundation === 'radius'"><th scope="col">Token</th><th scope="col">Level</th><th scope="col">CSS value</th><th scope="col">Effective value</th><th scope="col">Unit</th></tr>
-                <tr v-else><th scope="col">Token</th><th scope="col">Current value</th><th scope="col">Reference</th></tr>
+                <tr><th scope="col">Token</th><th scope="col">Current value</th></tr>
               </thead>
               <tbody>
                 <template v-for="group in tokenGroups" :key="group.id">
-                  <tr v-if="group.label" class="foundation-tokens__group"><th :colspan="activeFoundation === 'radius' ? 5 : 3" scope="colgroup">{{ group.label }}</th></tr>
+                  <tr v-if="group.label" class="foundation-tokens__group"><th colspan="2" scope="colgroup">{{ group.label }}</th></tr>
                   <tr v-for="token in group.rows" :key="token.name">
                     <th scope="row"><code>{{ token.name }}</code></th>
-                    <template v-if="activeFoundation === 'radius'">
-                      <td data-label="Level">{{ token.level }}</td>
-                      <td data-label="CSS value"><TokenValueDisplay :value="token.value" :resolved-value="token.effective" /></td>
-                      <td data-label="Effective value"><code>{{ token.effective }}</code></td>
-                      <td data-label="Unit">{{ token.unit }}</td>
-                    </template>
-                    <template v-else>
-                      <td data-label="Current value">
-                        <TokenValueDisplay
-                          :value="token.value"
-                          :resolved-value="token.effective"
-                          :color="activeFoundation === 'colors' ? `var(${token.name})` : ''"
-                        />
-                      </td>
-                      <td data-label="Reference"><code class="foundation-tokens__reference">{{ token.reference }}</code></td>
-                    </template>
+                    <td data-label="Current value">
+                      <TokenValueDisplay
+                        :value="token.value"
+                        :resolved-value="token.effective"
+                        :color="activeFoundation === 'colors' ? `var(${token.name})` : ''"
+                      />
+                    </td>
                   </tr>
                 </template>
               </tbody>

@@ -6,16 +6,18 @@ import DcSelect from '../components/ui/DcSelect.vue'
 import DcSlider from '../components/ui/DcSlider.vue'
 import DcTabs from '../components/ui/DcTabs.vue'
 import { SPACING_SCALE } from '../utils/designTokens.js'
+import { getBrandColor } from '../utils/brand.js'
 
 const props = defineProps({
   cssVariables: { type: Object, required: true },
 })
 
+const brandColor = getBrandColor()
 const colorTokens = [
   { name: 'Canvas', token: '--dc-color-canvas', value: '#F5F5F2' },
   { name: 'Surface', token: '--dc-color-surface', value: '#FFFFFF' },
   { name: 'Muted', token: '--dc-color-muted', value: '#71717A' },
-  { name: 'Brand', token: '--dc-color-brand', value: '#635BFF' },
+  { name: 'Brand', token: '--dc-color-brand', value: brandColor },
   { name: 'Success', token: '--dc-color-success', value: '#138A5B' },
   { name: 'Warning', token: '--dc-color-warning', value: '#B56B00' },
   { name: 'Danger', token: '--dc-color-danger', value: '#D83A52' },
@@ -53,12 +55,12 @@ const checkboxValue = ref(true)
 const radioValue = ref('comfortable')
 const switchValue = ref(true)
 const sliderValue = ref(58)
-const colorValue = ref('#635bff')
+const colorValue = ref(brandColor)
 const activeTab = ref('foundations')
 const activeSegment = ref('design')
 const activeNav = ref('Components')
 const zoom = ref(100)
-const patternColor = ref('#635bff')
+const patternColor = ref(brandColor)
 const patternFont = ref('geist')
 const patternSize = ref(32)
 const zoomLabel = computed(() => `${zoom.value}%`)
@@ -107,7 +109,7 @@ function changeZoom(amount) {
             <p class="type-specimen__h1"><span>Display / 80</span>Craft better systems.</p>
             <p class="type-specimen__h2"><span>Heading / 28</span>Everything in its place.</p>
             <p class="type-specimen__body"><span>Body / 14</span>Thoughtful tools for shaping consistent interfaces.</p>
-            <p class="type-specimen__mono"><span>Mono / 11</span>--dc-color-brand: #635bff;</p>
+            <p class="type-specimen__mono"><span>Mono / 11</span>--dc-color-brand: {{ brandColor }};</p>
           </div>
         </div>
 
@@ -228,7 +230,7 @@ function changeZoom(amount) {
         </article>
         <article class="dc-card">
           <header class="dc-card__header"><strong>Color token</strong><button type="button" aria-label="More options">•••</button></header>
-          <div class="dc-card__content"><span class="dc-card__swatch"></span><div><strong>Violet 500</strong><small>#635BFF</small></div></div>
+          <div class="dc-card__content"><span class="dc-card__swatch"></span><div><strong>Brand 500</strong><small>{{ brandColor }}</small></div></div>
         </article>
         <div class="container-demo"><span>Centered container</span><code>max-width: 72rem</code></div>
       </div>
@@ -284,7 +286,7 @@ function changeZoom(amount) {
           <header><div><span>Editor</span><h3>Color token</h3></div><span class="dc-badge dc-badge--brand">Primitive</span></header>
           <div class="pattern-card__body">
             <label class="pattern-color"><input v-model="patternColor" type="color" aria-label="Pattern color" /><span :style="{ background: patternColor }"></span><code>{{ patternColor }}</code></label>
-            <DcInput id="pattern-name" model-value="violet-500" label="Token name" />
+            <DcInput id="pattern-name" model-value="brand-500" label="Token name" />
             <DcButton size="small">Save token</DcButton>
           </div>
         </article>

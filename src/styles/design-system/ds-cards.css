@@ -1,10 +1,11 @@
 @layer design-system {
   .ds-card {
     display: grid;
+    align-content: start;
     gap: var(--ds-card-image-gap);
     min-width: 0;
     padding: var(--ds-card-padding);
-    border: 1px solid var(--ds-color-border-primary-default);
+    border: 1px solid var(--ds-color-border-subtle);
     border-radius: var(--ds-radius-card-primary);
     color: var(--ds-color-text-primary-default);
     background: var(--ds-color-bg-surface-default);
@@ -21,8 +22,15 @@
 
   .ds-card__content {
     display: grid;
+    align-content: start;
     gap: var(--ds-card-content-gap);
+    height: 100%;
     min-width: 0;
+  }
+
+  .ds-card__content > .ds-typography--body {
+    max-width: 46ch;
+    color: var(--ds-color-text-secondary-default);
   }
 
   .ds-card__media { min-width: 0; overflow: hidden; border-radius: var(--ds-radius-surface-inner); }
@@ -31,7 +39,7 @@
     display: block;
     width: 100%;
     aspect-ratio: 16 / 9;
-    object-fit: contain;
+    object-fit: cover;
     border-radius: inherit;
     background: var(--ds-color-bg-canvas-default);
   }
@@ -56,7 +64,9 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--ds-button-gap);
-    margin-top: calc(var(--ds-card-actions-gap) - var(--ds-card-content-gap));
+    align-self: end;
+    margin-top: auto;
+    padding-top: calc(var(--ds-card-actions-gap) - var(--ds-card-content-gap));
   }
 
   .ds-card__price,
@@ -107,6 +117,9 @@
   .ds-card--statistic { background: var(--ds-color-bg-surface-muted); }
   .ds-card--cta { color: var(--ds-color-text-on-primary); background: var(--ds-color-bg-fill-primary-default); }
   .ds-card--cta :is(.ds-typography--h3, .ds-typography--body) { color: inherit; }
+  .ds-card--cta .ds-button--primary { color: var(--ds-color-selection-text); background: var(--ds-color-bg-surface-default); }
+  .ds-card--cta .ds-button--ghost { color: inherit; }
+  .ds-card--cta .ds-button--ghost:hover { color: var(--ds-color-text-primary-default); }
 
   @container (min-width: 42rem) {
     .ds-card--horizontal {

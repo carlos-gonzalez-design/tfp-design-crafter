@@ -1,7 +1,12 @@
+import { getBrandColor } from '../utils/brand.js'
+
 export function createDefaultFoundations() {
   return {
     colors: {
-      primary: '#4353FF',
+      primary: getBrandColor(),
+      foregroundUsePrimary: false,
+      foregroundMode: 'auto',
+      primaryTone: 'auto',
       background: '#F7F7F8',
       surface: '#FFFFFF',
       text: '#18181B',

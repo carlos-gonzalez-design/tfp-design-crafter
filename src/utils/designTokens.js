@@ -2,8 +2,10 @@ import {
   getAccessibleTextColor,
   getPrimaryColorRoles,
   getPrimaryColorScale,
+  getRecommendedPrimaryTone,
   normalizeHexColor,
 } from './colorScale.js'
+import { getBrandColor } from './brand.js'
 
 // One transformation feeds the scoped canvas, UI Kit and CSS export.
 export const SPACING_SCALE = Object.freeze([
@@ -225,6 +227,7 @@ const FOUNDATION_TOKEN_FILTERS = Object.freeze({
   spacing: name => name === '--ds-density'
     || name.startsWith('--ds-space-')
     || name.startsWith('--ds-spacing-')
+    || name.startsWith('--ds-control-height-')
     || /--ds-(?:card|button|badge).*(?:padding|gap)/.test(name),
   radius: name => name.startsWith('--ds-radius-'),
 })
@@ -237,7 +240,7 @@ export function getFoundationTokens(cssVariables, foundation) {
 export function createDesignTokens(foundations) {
   const { colors, typography, spacing, radius } = foundations
   const normalizedColors = {
-    primary: normalizeHexColor(colors?.primary) ?? '#4353FF',
+    primary: normalizeHexColor(colors?.primary) ?? getBrandColor(),
     background: normalizeHexColor(colors?.background) ?? '#F7F7F8',
     surface: normalizeHexColor(colors?.surface) ?? '#FFFFFF',
     text: normalizeHexColor(colors?.text) ?? '#18181B',
@@ -246,8 +249,33 @@ export function createDesignTokens(foundations) {
     error: normalizeHexColor(colors?.error) ?? '#C83A3A',
     info: normalizeHexColor(colors?.info) ?? '#2563EB',
   }
-  const primaryScale = getPrimaryColorScale(normalizedColors.primary)
-  const primaryRoles = getPrimaryColorRoles(primaryScale, normalizedColors)
+  const primaryScale = getPrimaryColorScale(normalizedColors.primary, colors?.primaryTone)
+  const primaryTone = primaryScale.find(tone => tone.name === String(colors?.primaryTone))
+  const selectedPrimaryTone = primaryTone ?? getRecommendedPrimaryTone(primaryScale, normalizedColors.primary, normalizedColors.background)
+  const primaryRoles = getPrimaryColorRoles(primaryScale, normalizedColors, primaryTone?.name ?? 'auto')
+  if (colors?.foregroundUsePrimary) {
+    const sourceText = getAccessibleTextColor(normalizedColors.primary)
+    Object.assign(primaryRoles, {
+      action: 'source',
+      actionHover: 'source',
+      actionActive: 'source',
+      actionText: sourceText,
+      actionHoverText: sourceText,
+      actionActiveText: sourceText,
+      link: 'source',
+      linkHover: 'source',
+      focus: 'source',
+    })
+  }
+  const recommendedForeground = getRecommendedPrimaryTone(primaryScale, normalizedColors.primary, normalizedColors.background)
+  const foregroundMode = colors?.foregroundMode ?? 'auto'
+  const foregroundColor = colors?.foregroundUsePrimary
+    ? normalizedColors.primary
+    : foregroundMode === 'white'
+      ? '#FFFFFF'
+      : foregroundMode === 'black'
+        ? '#000000'
+        : recommendedForeground.hex
   const textReference = choice => choice.hex === '#FFFFFF'
     ? 'var(--color-neutral-white)'
     : 'var(--color-neutral-black)'
@@ -264,6 +292,8 @@ export function createDesignTokens(foundations) {
 
   return {
     '--color-primary-source': normalizedColors.primary,
+    '--color-primary-selected': selectedPrimaryTone.hex,
+    '--color-foreground': foregroundColor,
     ...Object.fromEntries(primaryScale.map(tone => [tone.token, tone.hex])),
     '--color-neutral-background': normalizedColors.background,
     '--color-neutral-surface': normalizedColors.surface,
@@ -294,6 +324,7 @@ export function createDesignTokens(foundations) {
     '--ds-color-text-on-primary': textReference(primaryRoles.actionText),
     '--ds-color-text-danger-default': 'var(--color-state-error)',
     '--ds-color-border-primary-default': 'var(--ds-color-border)',
+    '--ds-color-border-subtle': 'color-mix(in srgb, var(--ds-color-text) 12%, var(--ds-color-surface))',
     '--ds-color-border-primary-focus': `var(--color-primary-${primaryRoles.focus})`,
     '--ds-color-border-secondary-default': 'color-mix(in srgb, var(--ds-color-text) 30%, var(--ds-color-surface))',
     '--ds-color-border-danger-default': 'var(--color-state-error)',
@@ -328,6 +359,14 @@ export function createDesignTokens(foundations) {
     '--ds-color-status-warning': 'var(--color-state-warning)',
     '--ds-color-status-error': 'var(--color-state-error)',
     '--ds-color-status-info': 'var(--color-state-info)',
+    '--ds-color-status-success-foreground': 'color-mix(in srgb, var(--ds-color-status-success) 45%, var(--ds-color-text-primary-default))',
+    '--ds-color-status-warning-foreground': 'color-mix(in srgb, var(--ds-color-status-warning) 45%, var(--ds-color-text-primary-default))',
+    '--ds-color-status-error-foreground': 'color-mix(in srgb, var(--ds-color-status-error) 45%, var(--ds-color-text-primary-default))',
+    '--ds-color-status-info-foreground': 'color-mix(in srgb, var(--ds-color-status-info) 45%, var(--ds-color-text-primary-default))',
+    '--ds-color-bg-status-success-subtle': 'color-mix(in srgb, var(--ds-color-status-success) 10%, var(--ds-color-bg-surface-default))',
+    '--ds-color-bg-status-warning-subtle': 'color-mix(in srgb, var(--ds-color-status-warning) 10%, var(--ds-color-bg-surface-default))',
+    '--ds-color-bg-status-error-subtle': 'color-mix(in srgb, var(--ds-color-status-error) 10%, var(--ds-color-bg-surface-default))',
+    '--ds-color-bg-status-info-subtle': 'color-mix(in srgb, var(--ds-color-status-info) 10%, var(--ds-color-bg-surface-default))',
     '--ds-color-text-on-success': textReference(getAccessibleTextColor(normalizedColors.success)),
     '--ds-color-text-on-warning': textReference(getAccessibleTextColor(normalizedColors.warning)),
     '--ds-color-text-on-error': textReference(getAccessibleTextColor(normalizedColors.error)),
@@ -387,6 +426,7 @@ export function createDesignTokens(foundations) {
     '--ds-spacing-section-primary': `var(--ds-space-${densityConfig.sectionGap})`,
     '--ds-spacing-control-md-inline': `var(--ds-space-${densityConfig.controlPaddingInline})`,
     '--ds-spacing-control-md-block': `var(--ds-space-${densityConfig.controlPaddingBlock})`,
+    '--ds-control-height-md': 'calc(1.5em + var(--ds-spacing-control-md-block) + var(--ds-spacing-control-md-block) + 2px)',
     '--ds-card-padding': 'var(--ds-spacing-card-padding)',
     '--ds-card-content-gap': 'var(--ds-spacing-card-content-gap)',
     '--ds-card-image-gap': 'var(--ds-spacing-card-image-gap)',
@@ -423,7 +463,7 @@ export function createDesignTokens(foundations) {
 }
 
 const PRIMITIVE_TOKEN_PATTERN = /--(?:color-(?:primary-(?:source|50|100|200|300|400|500|600|700|800|900|950)|neutral-|state-)|ds-(?:color-(?:background|surface|text)$|font-size-(?:2xs|xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl)$|space-(?:none|4xs|3xs|2xs|xs|sm|md|lg|xl|2xl|3xl)$|radius-(?:none|sm|md|lg|xl|2xl|full|circle)$))/
-const COMPONENT_TOKEN_PATTERN = /--ds-(?:color-(?:button|control)-|font-(?:size|weight)-(?:button|control|badge)-|spacing-(?:button|card)-|radius-(?:button|card|input|badge|checkbox|switch|progress|tooltip|overlay)-|(?:button|card|badge)-)/
+const COMPONENT_TOKEN_PATTERN = /--ds-(?:color-(?:button|control)-|control-height-|font-(?:size|weight)-(?:button|control|badge)-|spacing-(?:button|card)-|radius-(?:button|card|input|badge|checkbox|switch|progress|tooltip|overlay)-|(?:button|card|badge)-)/
 
 export function getDesignTokenLevel(name) {
   return PRIMITIVE_TOKEN_PATTERN.test(name) ? 'Primitive' : COMPONENT_TOKEN_PATTERN.test(name) ? 'Component' : 'Semantic'
@@ -432,7 +472,7 @@ export function getDesignTokenLevel(name) {
 function getTokenType(name) {
   if (name.includes('color')) return 'color'
   if (name.includes('font') || name.includes('text-') || name.includes('line-height') || name.includes('letter-spacing')) return 'typography'
-  if (name.includes('spacing') || name.includes('space-') || name.includes('padding') || name.includes('gap')) return 'dimension'
+  if (name.includes('spacing') || name.includes('space-') || name.includes('padding') || name.includes('gap') || name.includes('height')) return 'dimension'
   if (name.includes('radius')) return 'borderRadius'
   return 'other'
 }

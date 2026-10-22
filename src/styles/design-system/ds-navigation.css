@@ -14,14 +14,13 @@
     gap: var(--ds-spacing-button-group-gap);
     min-width: 0;
     overflow-x: auto;
-    border-bottom: 1px solid var(--ds-color-border-primary-default);
+    overflow-y: hidden;
     background: var(--ds-color-bg-surface-default);
     scrollbar-width: thin;
   }
 
   .ds-tabs__trigger {
     flex: 0 0 auto;
-    margin-bottom: -1px;
     padding: var(--ds-spacing-card-content-gap) var(--ds-spacing-card-padding);
     border: 0;
     border-bottom: 0.125rem solid transparent;
@@ -55,9 +54,9 @@
   }
 
   .ds-tabs__content {
-    min-height: 5rem;
     padding: var(--ds-spacing-card-padding);
-    border: 1px solid var(--ds-color-border-primary-default);
+    overflow: visible;
+    border: 1px solid var(--ds-color-border-subtle);
     border-radius: var(--ds-radius-surface-primary);
     color: var(--ds-color-text-primary-default);
     background: var(--ds-color-bg-surface-default);

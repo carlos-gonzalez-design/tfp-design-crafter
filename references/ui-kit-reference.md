@@ -1,4 +1,4 @@
-# Design Crafter UI Kit — referencia de extracción
+﻿# Design Crafter UI Kit — referencia de extracción
 
 ## Alcance y fuente
 
@@ -12,7 +12,7 @@ El resultado no contiene Tailwind, Sass, CSS-in-JS, React ni Vue. Los selectores
 
 | Token | Valor | Uso observado |
 |---|---|---|
-| `--dc-color-white` | `#ffffff` | Superficie clara, texto sobre brand y thumb del switch |
+| `--dc-color-white` | `#ffffff` | Superficie clara, superficie clara y thumb del switch |
 | `--dc-color-neutral-25` | `#fafaf9` | Superficie elevada |
 | `--dc-color-neutral-50` | `#f5f5f2` | Canvas |
 | `--dc-color-neutral-200` | `#e4e4e7` | Borde |
@@ -20,17 +20,16 @@ El resultado no contiene Tailwind, Sass, CSS-in-JS, React ni Vue. Los selectores
 | `--dc-color-neutral-400` | `#a1a1aa` | Texto subtle |
 | `--dc-color-neutral-500` | `#71717a` | Texto muted |
 | `--dc-color-neutral-950` | `#18181b` | Texto principal |
-| `--dc-color-brand-50` | `#efefff` | Fondo brand soft |
+| `--dc-color-brand-50` | mezcla de brand 8% con blanco | Fondo brand soft |
 | `--dc-color-brand-500` | `#635bff` | Acción principal y foco |
-| `--dc-color-brand-600` | `#554ee8` | Hover de acción principal |
+| `--dc-color-brand-600` | mezcla de brand 86% con negro | Hover de acción principal |
 | `--dc-color-success-700` | `#138a5b` | Estado success |
 | `--dc-color-warning-700` | `#b56b00` | Estado warning |
 | `--dc-color-danger-600` | `#d83a52` | Estado danger/error |
-| `--dc-color-demo-swatch` | `#6c5ce7` | Muestra de color del contenido del UI Kit |
 
 Los fondos soft son `#eaf8f1`, `#fff7e8` y `#fff0f2` para success, warning y danger.
 
-### Roles semánticos
+#| `--dc-color-brand-text` | mezcla de brand 72% con negro | Texto brand sobre fondo claro |`r`n`r`n## Roles semánticos
 
 Los componentes consumen `--dc-color-canvas`, `--dc-color-surface`, `--dc-color-raised`, `--dc-color-ink`, `--dc-color-muted`, `--dc-color-subtle`, `--dc-color-border`, `--dc-color-border-strong`, `--dc-color-brand` y los roles de estado.
 
@@ -116,7 +115,7 @@ La implementación también usa ajustes de 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 18,
 
 - Transición de controles: `150ms ease`.
 - Transición de tema y switch: `200ms ease`.
-- Hover primary: brand `#635bff` → `#554ee8`.
+- Hover primary: brand `#635bff` con mezcla de negro (86% brand).
 - Hover secondary y ghost: fondo raised.
 - Focus: ring brand de 3px.
 - Active: desplazamiento vertical de 1px y `brightness(0.9)`.
@@ -209,4 +208,8 @@ El proyecto actual no contiene un componente Tooltip ni estilos asociados. No se
 1. **Fuentes:** los CSS extraídos no fuerzan una URL externa. Para fidelidad, la aplicación debe cargar Geist y DM Mono con los pesos documentados, ya sea mediante Google Fonts o archivos autoalojados.
 2. **Iconos:** los SVG actuales reciben tamaño, stroke `currentColor`, `stroke-width: 1.8`, linecap y linejoin desde React. Estos atributos pueden conservarse directamente en el SVG; no dependen de una librería visual.
 3. **Slider:** el porcentaje de progreso es un dato dinámico, no un token de diseño.
-4. **Muestras de color:** `#6c5ce7` es contenido de demostración, no un color semántico de la interfaz. Se conserva como `--dc-color-demo-swatch` para reproducir la card actual.
+4. **Muestras de color:** la muestra principal de la card usa el token de marca `--dc-color-brand`.
+
+
+
+

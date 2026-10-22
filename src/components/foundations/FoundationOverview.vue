@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import DcButton from '../ui/DcButton.vue'
-import { getPrimaryColorScale } from '../../utils/colorScale.js'
+import { getPrimaryColorScale, getRecommendedPrimaryTone } from '../../utils/colorScale.js'
 import {
   getAppliedSpacing,
   getRadiusDecision,
@@ -23,9 +23,22 @@ const ratioLabel = computed(() => TYPE_SCALE_RATIOS.find(
   option => option.value === Number(props.foundations.typography.scaleRatio),
 )?.label ?? 'Custom ratio')
 const appliedSpacing = computed(() => getAppliedSpacing(props.foundations.spacing.density))
-const overviewPrimaryTones = computed(() => getPrimaryColorScale(props.foundations.colors.primary).filter(
-  tone => ['100', '300', '500', '700', '900'].includes(tone.name),
-))
+const overviewPrimaryScale = computed(() => getPrimaryColorScale(props.foundations.colors.primary, props.foundations.colors.primaryTone))
+const overviewSelectedTone = computed(() => {
+  if (props.foundations.colors.foregroundUsePrimary && props.foundations.colors.primaryTone === 'auto') {
+    return { name: 'source', hex: props.foundations.colors.primary }
+  }
+  return overviewPrimaryScale.value.find(
+    tone => tone.name === String(props.foundations.colors.primaryTone),
+  ) ?? getRecommendedPrimaryTone(overviewPrimaryScale.value, props.foundations.colors.primary, props.foundations.colors.background)
+})
+const overviewPrimaryTones = computed(() => {
+  const tones = overviewPrimaryScale.value.filter(
+    tone => ['100', '300', '500', '700', '900'].includes(tone.name) || tone.name === overviewSelectedTone.value.name,
+  )
+  if (!overviewPrimaryScale.value.some(tone => tone.name === overviewSelectedTone.value.name)) tones.push(overviewSelectedTone.value)
+  return tones
+})
 const radiusOverview = computed(() => Object.entries(RADIUS_OPTIONS).map(([id, category]) => ({
   id,
   category: category.label.replace(' Shape', '').replace(' Corners', ''),
@@ -48,7 +61,7 @@ const radiusOverview = computed(() => Object.entries(RADIUS_OPTIONS).map(([id, c
           <DcButton size="small" variant="secondary" @click="emit('edit', 'colors')">Edit colors</DcButton>
         </div>
         <div class="overview-colors" aria-label="Current color palette">
-          <span v-for="tone in overviewPrimaryTones" :key="tone.name" :style="{ backgroundColor: tone.hex }" :title="`Primary ${tone.name}: ${tone.hex}`"></span>
+          <span v-for="tone in overviewPrimaryTones" :key="tone.name" :class="{ 'overview-colors__tone--selected': tone.name === overviewSelectedTone.name }" :style="{ backgroundColor: tone.hex }" :title="`${tone.name === overviewSelectedTone.name ? 'Selected primary' : 'Primary'} ${tone.name}: ${tone.hex}`" :aria-label="`${tone.name === overviewSelectedTone.name ? 'Selected primary' : 'Primary'} tone ${tone.name}, ${tone.hex}`"></span>
         </div>
         <p class="overview-card__summary">11 generated primary tones · 4 neutrals · 4 state colors</p>
       </article>
