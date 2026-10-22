@@ -9,7 +9,7 @@ import PlaygroundFeedback from '../playground/PlaygroundFeedback.vue'
 import PlaygroundForms from '../playground/PlaygroundForms.vue'
 import PlaygroundNavigation from '../playground/PlaygroundNavigation.vue'
 import PlaygroundOverview from '../playground/PlaygroundOverview.vue'
-import PlaygroundTypography from '../playground/PlaygroundTypography 2.vue'
+import PlaygroundTypography from '../playground/PlaygroundTypography.vue'
 import { PLAYGROUND_CATEGORIES } from '../playground/componentCatalog.js'
 import {
   getComponentTokenNames,
