@@ -1,5 +1,6 @@
 <script setup>
 import { inject } from 'vue'
+import { X } from '@lucide/vue'
 import { PopoverArrow, PopoverClose, PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger } from 'reka-ui'
 import { DS_PORTAL_ROOT } from '../dsContext.js'
 
@@ -13,7 +14,7 @@ const portalRoot = inject(DS_PORTAL_ROOT, undefined)
     <PopoverPortal :to="portalRoot">
       <PopoverContent class="ds-popover__content" :side-offset="6" align="start">
         <strong>{{ title }}</strong><div class="ds-popover__body"><slot /></div>
-        <PopoverClose class="ds-dialog__close" aria-label="Close popover">×</PopoverClose><PopoverArrow class="ds-popover__arrow" />
+        <PopoverClose class="ds-dialog__close" aria-label="Close popover"><X :size="16" aria-hidden="true" /></PopoverClose><PopoverArrow class="ds-popover__arrow" />
       </PopoverContent>
     </PopoverPortal>
   </PopoverRoot>

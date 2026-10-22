@@ -1,0 +1,33 @@
+@layer components {
+  .token-value {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--dc-space-2);
+    width: 100%;
+    min-width: 0;
+    color: var(--dc-color-ink);
+    text-align: right;
+  }
+
+  .token-value--color { gap: var(--dc-space-2); }
+
+  .token-value__swatch {
+    display: block;
+    flex: 0 0 auto;
+    width: 0.875rem;
+    height: 0.875rem;
+    border: var(--dc-border-default);
+    border-radius: var(--dc-radius-sm);
+    background: var(--token-value-color);
+  }
+
+  .token-value__summary {
+    min-width: 0;
+    color: inherit;
+    font: var(--dc-font-size-10)/1.45 'Geist Mono', var(--dc-font-family-mono);
+    text-align: inherit;
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+}

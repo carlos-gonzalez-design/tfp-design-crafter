@@ -10,16 +10,18 @@
   --dc-color-neutral-400: #a1a1aa;
   --dc-color-neutral-500: #71717a;
   --dc-color-neutral-950: #18181b;
-  --dc-color-brand-50: #efefff;
   --dc-color-brand-500: #635bff;
-  --dc-color-brand-600: #554ee8;
+  --dc-color-brand-50: color-mix(in srgb, var(--dc-color-brand-500) 8%, var(--dc-color-white));
+  --dc-color-brand-600: color-mix(in srgb, var(--dc-color-brand-500) 86%, #000000);
+  --dc-color-brand-text: color-mix(in srgb, var(--dc-color-brand-500) 72%, #000000);
+  --dc-color-brand-light: color-mix(in srgb, var(--dc-color-brand-500) 55%, var(--dc-color-white));
+  --dc-color-brand-ink: var(--dc-color-white);
   --dc-color-success-50: #eaf8f1;
   --dc-color-success-700: #138a5b;
   --dc-color-warning-50: #fff7e8;
   --dc-color-warning-700: #b56b00;
   --dc-color-danger-50: #fff0f2;
   --dc-color-danger-600: #d83a52;
-  --dc-color-demo-swatch: #6c5ce7;
 
   /* Colors: semantic, light theme */
   --dc-color-canvas: var(--dc-color-neutral-50);
@@ -39,6 +41,9 @@
   --dc-color-warning-soft: var(--dc-color-warning-50);
   --dc-color-danger: var(--dc-color-danger-600);
   --dc-color-danger-soft: var(--dc-color-danger-50);
+  --dc-color-contrast-pass: #166534;
+  --dc-color-contrast-fail: #991b1b;
+  --dc-color-on-contrast-status: #ffffff;
 
   /* Typography */
   --dc-font-family-sans: "Geist", sans-serif;
@@ -117,7 +122,7 @@
   --dc-border-canvas: var(--dc-border-width) dashed var(--dc-color-border-strong);
 
   /* Shadows */
-  --dc-shadow-focus: 0 0 0 0.1875rem rgb(99 91 255 / 20%);
+  --dc-shadow-focus: 0 0 0 0.1875rem color-mix(in srgb, var(--dc-color-brand) 20%, transparent);
   --dc-shadow-raised: 0 0.5rem 1.875rem rgb(24 24 27 / 7%);
   --dc-shadow-button: 0 0.0625rem 0.125rem rgb(0 0 0 / 3%);
   --dc-shadow-control: 0 0.0625rem 0.125rem rgb(0 0 0 / 20%);
@@ -156,7 +161,7 @@
     --dc-font-size-value: var(--dc-font-size-10);
     --dc-font-size-control: var(--dc-font-size-12);
     --dc-color-border-hover: var(--dc-color-border-strong);
-    --dc-color-brand-strong: var(--dc-color-brand-hover);
+    --dc-color-brand-strong: var(--dc-color-brand-text);
     --dc-color-disabled: var(--dc-color-raised);
     --dc-slider-track-size: var(--dc-slider-track-height);
     --dc-shadow-dropdown: var(--dc-shadow-raised);
@@ -178,11 +183,40 @@
     --dc-color-subtle: #71717a;
     --dc-color-border: #2e2e33;
     --dc-color-border-strong: #414148;
-    --dc-color-brand-soft: #29274d;
+    --dc-color-brand-soft: color-mix(in srgb, var(--dc-color-brand) 20%, var(--dc-color-surface));
+    --dc-color-brand-strong: var(--dc-color-brand);
+    --dc-color-brand-text: var(--dc-color-brand);
     --dc-color-success-soft: #172c24;
     --dc-color-warning-soft: #332817;
     --dc-color-danger-soft: #351b20;
     --dc-shadow-raised: 0 0.5rem 1.875rem rgb(0 0 0 / 25%);
+  }
+
+  .dc-theme--dark .ds-theme {
+    color-scheme: dark;
+    --color-neutral-background: #111113;
+    --color-neutral-surface: #19191c;
+    --color-neutral-text: #f5f5f5;
+    --color-neutral-muted: rgb(245 245 245 / 72%);
+    --color-neutral-border: color-mix(in srgb, var(--color-neutral-text) 18%, var(--color-neutral-surface));
+    --color-neutral-white: #f5f5f5;
+    --color-neutral-black: #000000;
+    --ds-color-background: var(--color-neutral-background);
+    --ds-color-surface: var(--color-neutral-surface);
+    --ds-color-text: var(--color-neutral-text);
+    --ds-color-text-muted: var(--color-neutral-muted);
+    --ds-color-border: var(--color-neutral-border);
+    --ds-color-text-primary-default: var(--ds-color-text);
+    --ds-color-text-secondary-default: var(--ds-color-text-muted);
+    --ds-color-bg-canvas-default: var(--ds-color-background);
+    --ds-color-bg-surface-default: var(--ds-color-surface);
+    --ds-color-bg-surface-muted: color-mix(in srgb, var(--ds-color-text) 6%, var(--ds-color-surface));
+    --ds-color-border-subtle: color-mix(in srgb, var(--ds-color-text) 12%, var(--ds-color-surface));
+    --ds-color-border-secondary-default: color-mix(in srgb, var(--ds-color-text) 30%, var(--ds-color-surface));
+    --ds-color-button-secondary-background-default: var(--color-neutral-surface);
+    --ds-color-button-tertiary-background-hover: color-mix(in srgb, var(--color-primary-500) 26%, var(--color-neutral-surface));
+    --ds-color-badge-brand-background: color-mix(in srgb, var(--color-primary-500) 26%, var(--color-neutral-surface));
+    --ds-color-selection-background: color-mix(in srgb, var(--color-primary-500) 26%, var(--color-neutral-surface));
   }
 }
 

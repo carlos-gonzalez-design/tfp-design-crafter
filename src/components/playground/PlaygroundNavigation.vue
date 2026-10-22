@@ -43,16 +43,16 @@ const views = [{ value: 'grid', label: 'Grid' }, { value: 'list', label: 'List' 
     <PlaygroundSectionHeader
       title-id="playground-navigation-title"
       title="Navigation"
-      description="Headless navigation patterns preserve keyboard behavior while sharing one token-driven visual layer."
+      description="Wayfinding patterns preserve keyboard behavior while sharing one clear, token-driven visual layer."
     />
     <div class="ds-navigation-showcase">
-      <div class="ds-navigation-showcase__wide"><span class="ds-examples__label">Breadcrumbs</span><DsBreadcrumbs :items="breadcrumbs" /></div>
-      <div class="ds-navigation-showcase__wide"><span class="ds-examples__label">Navigation menu</span><DsNavigationMenu :items="navigationItems" /></div>
-      <div class="ds-navigation-showcase__wide"><span class="ds-examples__label">Tabs</span><DsTabs v-model="activeTab" :tabs="tabs" label="Example project sections" /></div>
-      <div><span class="ds-examples__label">Dropdown menu</span><DsDropdownMenu label="Project actions" :items="dropdownItems" @select="lastAction = $event" /><p class="ds-navigation-showcase__status" aria-live="polite">{{ lastAction }}</p></div>
-      <div><span class="ds-examples__label">Segmented control</span><DsSegmentedControl v-model="view" :items="views" label="Layout view" /></div>
-      <div class="ds-navigation-showcase__wide"><span class="ds-examples__label">Pagination</span><DsPagination v-model:page="page" :total="120" :items-per-page="10" /></div>
-      <div class="ds-navigation-showcase__wide"><span class="ds-examples__label">Accordion</span><DsAccordion :items="accordionItems" default-value="foundations" /></div>
+      <section class="ds-navigation-showcase__wide ds-navigation-showcase__trail" aria-label="Location path"><span class="ds-examples__label">Breadcrumbs</span><DsBreadcrumbs :items="breadcrumbs" /></section>
+      <section class="ds-navigation-showcase__wide ds-navigation-showcase__menu" aria-label="Product navigation"><span class="ds-examples__label">Navigation menu</span><DsNavigationMenu :items="navigationItems" /></section>
+      <section class="ds-navigation-showcase__wide ds-navigation-showcase__tabs" aria-label="Section navigation"><span class="ds-examples__label">Tabs</span><DsTabs v-model="activeTab" :tabs="tabs" label="Example project sections" /></section>
+      <section class="ds-navigation-showcase__control"><span class="ds-examples__label">Dropdown menu</span><DsDropdownMenu label="Project actions" :items="dropdownItems" @select="lastAction = $event" /><p class="ds-navigation-showcase__status" aria-live="polite">{{ lastAction }}</p></section>
+      <section class="ds-navigation-showcase__control"><span class="ds-examples__label">Segmented control</span><DsSegmentedControl v-model="view" :items="views" label="Layout view" /></section>
+      <section class="ds-navigation-showcase__wide ds-navigation-showcase__pagination" aria-label="Pagination example"><span class="ds-examples__label">Pagination</span><DsPagination v-model:page="page" :total="120" :items-per-page="10" /></section>
+      <section class="ds-navigation-showcase__wide ds-navigation-showcase__accordion" aria-label="Frequently asked questions"><span class="ds-examples__label">Accordion</span><DsAccordion :items="accordionItems" default-value="foundations" /></section>
     </div>
   </section>
 </template>

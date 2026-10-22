@@ -17,7 +17,7 @@
 
   .ds-playground-section__eyebrow {
     margin: 0;
-    color: var(--ds-color-primary);
+    color: var(--ds-color-link-default);
     font-size: var(--ds-text-caption);
     font-weight: 600;
     letter-spacing: 0.08em;

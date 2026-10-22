@@ -1,5 +1,6 @@
 <script setup>
 import { inject } from 'vue'
+import { ChevronDown } from '@lucide/vue'
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuRoot, DropdownMenuSeparator, DropdownMenuTrigger } from 'reka-ui'
 import { DS_PORTAL_ROOT } from '../dsContext.js'
 
@@ -10,7 +11,7 @@ const portalRoot = inject(DS_PORTAL_ROOT, undefined)
 
 <template>
   <DropdownMenuRoot>
-    <DropdownMenuTrigger class="ds-menu__trigger" data-ds-component="DsDropdownMenu">{{ label }} <span aria-hidden="true">⌄</span></DropdownMenuTrigger>
+    <DropdownMenuTrigger class="ds-menu__trigger" data-ds-component="DsDropdownMenu">{{ label }} <ChevronDown :size="14" aria-hidden="true" /></DropdownMenuTrigger>
     <DropdownMenuPortal :to="portalRoot">
       <DropdownMenuContent class="ds-menu__content" :side-offset="6" align="start">
         <DropdownMenuLabel class="ds-menu__label">Project actions</DropdownMenuLabel>

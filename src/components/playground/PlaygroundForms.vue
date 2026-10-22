@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { Search } from '@lucide/vue'
 import DsButton from '../design-system/actions/DsButton.vue'
 import DsCheckbox from '../design-system/forms/DsCheckbox.vue'
 import DsField from '../design-system/forms/DsField.vue'
@@ -21,6 +22,7 @@ const updates = ref(true)
 const visibility = ref('team')
 const publicProfile = ref(true)
 const intensity = ref([64])
+const announcement = ref('')
 
 const roleOptions = [
   { value: 'designer', label: 'Product Designer' },
@@ -33,6 +35,24 @@ const visibilityOptions = [
   { value: 'team', label: 'My team' },
   { value: 'public', label: 'Everyone' },
 ]
+
+function saveProfile() {
+  announcement.value = `Profile saved for ${name.value || 'unnamed collaborator'}`
+}
+
+function resetForm() {
+  name.value = 'Alex Morgan'
+  email.value = 'alex@example.com'
+  password.value = ''
+  search.value = ''
+  bio.value = ''
+  role.value = 'designer'
+  updates.value = true
+  visibility.value = 'team'
+  publicProfile.value = true
+  intensity.value = [64]
+  announcement.value = 'Profile changes reset'
+}
 </script>
 
 <template>
@@ -40,33 +60,48 @@ const visibilityOptions = [
     <PlaygroundSectionHeader
       title-id="playground-forms-title"
       title="Forms"
-      description="Native fields and accessible Reka controls share one reactive visual language."
+      description="A complete profile flow brings fields, validation and preferences into one calm, readable composition."
     />
-    <form class="ds-form-demo" @submit.prevent>
+    <form class="ds-form-demo" @submit.prevent="saveProfile">
+      <header class="ds-form-demo__context">
+        <div>
+          <span class="ds-examples__label">Profile settings</span>
+          <h4>Tell your team who you are.</h4>
+        </div>
+        <p>Fields stay familiar across default, supporting, search and error states.</p>
+      </header>
       <div class="ds-form-demo__fields">
-        <DsField id="form-name" label="Full name" description="Use the name shown to collaborators." required v-slot="{ describedby }">
-          <DsInput id="form-name" v-model="name" :describedby="describedby" />
-        </DsField>
-        <DsField id="form-email" label="Email address" v-slot="{ describedby }">
-          <DsInput id="form-email" v-model="email" type="email" :describedby="describedby" />
-        </DsField>
-        <DsField id="form-password" label="Password" description="At least eight characters." v-slot="{ describedby }">
-          <DsInput id="form-password" v-model="password" type="password" placeholder="Enter password" :describedby="describedby" />
-        </DsField>
-        <DsField id="form-search" label="Search" v-slot="{ describedby }">
-          <DsInput id="form-search" v-model="search" type="search" icon="⌕" placeholder="Search projects" :describedby="describedby" />
-        </DsField>
-        <DsField id="form-role" label="Role">
-          <DsSelect v-model="role" :options="roleOptions" label="Role" />
-        </DsField>
-        <DsField id="form-error" label="Workspace URL" error="This URL is already in use." v-slot="{ describedby }">
-          <DsInput id="form-error" model-value="design-team" invalid :describedby="describedby" />
-        </DsField>
-        <DsField id="form-bio" label="Bio" class="ds-form-demo__wide" v-slot="{ describedby }">
-          <DsTextarea id="form-bio" v-model="bio" placeholder="Tell your team what you are working on…" :describedby="describedby" />
-        </DsField>
+        <div class="ds-form-demo__field-row">
+          <DsField id="form-name" label="Full name" description="Use the name shown to collaborators." required v-slot="{ describedby }">
+            <DsInput id="form-name" v-model="name" :describedby="describedby" />
+          </DsField>
+          <DsField id="form-email" label="Email address" v-slot="{ describedby }">
+            <DsInput id="form-email" v-model="email" type="email" :describedby="describedby" />
+          </DsField>
+        </div>
+        <div class="ds-form-demo__field-row">
+          <DsField id="form-password" label="Password" error="At least eight characters" v-slot="{ describedby }">
+            <DsInput id="form-password" v-model="password" type="password" placeholder="Enter password" invalid :describedby="describedby" />
+          </DsField>
+          <DsField id="form-search" label="Search" v-slot="{ describedby }">
+            <DsInput id="form-search" v-model="search" type="search" placeholder="Search projects" :describedby="describedby"><template #icon><Search :size="18" aria-hidden="true" /></template></DsInput>
+          </DsField>
+        </div>
+        <div class="ds-form-demo__field-row">
+          <DsField id="form-role" label="Role">
+            <DsSelect id="form-role" v-model="role" :options="roleOptions" label="Role" />
+          </DsField>
+          <DsField id="form-error" label="Workspace URL" error="This URL is already in use." v-slot="{ describedby }">
+            <DsInput id="form-error" model-value="design-team" invalid :describedby="describedby" />
+          </DsField>
+        </div>
+        <div class="ds-form-demo__field-row ds-form-demo__field-row--single">
+          <DsField id="form-bio" label="Bio" v-slot="{ describedby }">
+            <DsTextarea id="form-bio" v-model="bio" placeholder="Tell your team what you are working on…" :describedby="describedby" />
+          </DsField>
+        </div>
       </div>
-      <div class="ds-form-demo__choices">
+      <section class="ds-form-demo__choices" aria-label="Profile preferences">
         <div class="ds-form-demo__choice-group">
           <span class="ds-examples__label">Preferences</span>
           <DsCheckbox v-model="updates" label="Product updates" />
@@ -79,8 +114,9 @@ const visibilityOptions = [
         <div class="ds-form-demo__choice-group ds-form-demo__choice-group--slider">
           <DsSlider v-model="intensity" label="Notification intensity" />
         </div>
-      </div>
-      <div class="ds-examples__buttons"><DsButton type="submit">Save profile</DsButton><DsButton variant="ghost">Cancel</DsButton></div>
+      </section>
+      <footer class="ds-form-demo__actions"><DsButton type="submit">Save profile</DsButton><DsButton variant="ghost" @click="resetForm">Cancel</DsButton></footer>
+      <p class="sr-only" role="status" aria-live="polite">{{ announcement }}</p>
     </form>
   </section>
 </template>
