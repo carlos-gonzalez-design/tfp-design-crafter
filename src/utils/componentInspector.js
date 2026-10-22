@@ -74,4 +74,3 @@ export function getInspectorTokenCategory(name) {
   if (name.includes('radius')) return 'radius'
   return 'spacing'
 }
-

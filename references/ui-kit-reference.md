@@ -1,4 +1,4 @@
-﻿# Design Crafter UI Kit — referencia de extracción
+# Design Crafter UI Kit — referencia de extracción
 
 ## Alcance y fuente
 
@@ -209,7 +209,3 @@ El proyecto actual no contiene un componente Tooltip ni estilos asociados. No se
 2. **Iconos:** los SVG actuales reciben tamaño, stroke `currentColor`, `stroke-width: 1.8`, linecap y linejoin desde React. Estos atributos pueden conservarse directamente en el SVG; no dependen de una librería visual.
 3. **Slider:** el porcentaje de progreso es un dato dinámico, no un token de diseño.
 4. **Muestras de color:** la muestra principal de la card usa el token de marca `--dc-color-brand`.
-
-
-
-

@@ -264,4 +264,3 @@ export function getPrimaryColorRoles(scale, colors = {}, primaryTone = 'auto') {
     focus: selectedFocus.name,
   }
 }
-

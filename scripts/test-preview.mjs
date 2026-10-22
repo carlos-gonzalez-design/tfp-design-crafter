@@ -1,4 +1,4 @@
-﻿import assert from 'node:assert/strict'
+import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
 
 const cdpUrl = process.env.CDP_URL || 'http://127.0.0.1:9230'
@@ -986,4 +986,3 @@ try {
 } finally {
   socket.close()
 }
-
