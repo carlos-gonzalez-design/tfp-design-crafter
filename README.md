@@ -2,6 +2,10 @@
 
 Design Crafter es una herramienta web orientada a la creación y previsualización de las bases de un sistema de diseño. El proyecto está desarrollado con Vue 3 y Vite.
 
+# Enlaces de interés
+Github del proyecto: https://github.com/carlos-gonzalez-design/tfp-design-crafter
+Proyecto en Netlify: https://design-crafter-playground.netlify.app/
+
 ## Estado actual del proyecto
 
 El proyecto todavía está bastante verde, pero ya cuenta con una primera base funcional. La aplicación se ha organizado en dos áreas principales:
