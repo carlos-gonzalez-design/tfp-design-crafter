@@ -77,10 +77,6 @@ onMounted(() => {
         <img :src="theme === 'dark' ? '/images/logo-design-crafter-dark.svg' : '/images/logo-design-crafter.svg'" alt="Design Crafter" />
       </a>
       <span class="app-header__label">Visual Design Playground</span>
-      <nav class="app-header__nav" aria-label="Main navigation">
-        <a href="/app" :aria-current="!isUiKit ? 'page' : undefined" @click="navigate($event, '/app')">Dashboard</a>
-        <a href="/ui-kit" :aria-current="isUiKit ? 'page' : undefined" @click="navigate($event, '/ui-kit')">UI Kit</a>
-      </nav>
       <div class="app-header__session-controls">
         <ThemeControl class="app-header__theme-control" :theme="theme" @change="setTheme" />
         <UserSession />
