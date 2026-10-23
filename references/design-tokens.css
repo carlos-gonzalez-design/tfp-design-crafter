@@ -14,16 +14,17 @@
   --dc-color-neutral-400: #a1a1aa;
   --dc-color-neutral-500: #71717a;
   --dc-color-neutral-950: #18181b;
-  --dc-color-brand-50: #efefff;
+  --dc-color-brand-50: color-mix(in srgb, var(--dc-color-brand-500) 8%, var(--dc-color-white));
   --dc-color-brand-500: #635bff;
-  --dc-color-brand-600: #554ee8;
+  --dc-color-brand-600: color-mix(in srgb, var(--dc-color-brand-500) 86%, #000000);
+  --dc-color-brand-text: color-mix(in srgb, var(--dc-color-brand-500) 72%, #000000);
+  --dc-color-brand-ink: var(--dc-color-white);
   --dc-color-success-50: #eaf8f1;
   --dc-color-success-700: #138a5b;
   --dc-color-warning-50: #fff7e8;
   --dc-color-warning-700: #b56b00;
   --dc-color-danger-50: #fff0f2;
   --dc-color-danger-600: #d83a52;
-  --dc-color-demo-swatch: #6c5ce7;
 
   /* Colors: semantic, light theme */
   --dc-color-canvas: var(--dc-color-neutral-50);
@@ -37,6 +38,7 @@
   --dc-color-brand: var(--dc-color-brand-500);
   --dc-color-brand-hover: var(--dc-color-brand-600);
   --dc-color-brand-soft: var(--dc-color-brand-50);
+  --dc-color-brand-strong: var(--dc-color-brand-text);
   --dc-color-success: var(--dc-color-success-700);
   --dc-color-success-soft: var(--dc-color-success-50);
   --dc-color-warning: var(--dc-color-warning-700);
@@ -121,7 +123,7 @@
   --dc-border-canvas: var(--dc-border-width) dashed var(--dc-color-border-strong);
 
   /* Shadows */
-  --dc-shadow-focus: 0 0 0 0.1875rem rgb(99 91 255 / 20%);
+  --dc-shadow-focus: 0 0 0 0.1875rem color-mix(in srgb, var(--dc-color-brand) 20%, transparent);
   --dc-shadow-raised: 0 0.5rem 1.875rem rgb(24 24 27 / 7%);
   --dc-shadow-button: 0 0.0625rem 0.125rem rgb(0 0 0 / 3%);
   --dc-shadow-control: 0 0.0625rem 0.125rem rgb(0 0 0 / 20%);

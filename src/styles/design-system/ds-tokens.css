@@ -1,17 +1,17 @@
 @layer design-system {
   .ds-theme {
-    --color-primary-source: #4353ff;
-    --color-primary-50: #f1f5ff;
-    --color-primary-100: #dfe7ff;
-    --color-primary-200: #c0cfff;
-    --color-primary-300: #94acff;
-    --color-primary-400: #6b87ff;
-    --color-primary-500: #475aff;
-    --color-primary-600: #353ee0;
-    --color-primary-700: #272cb3;
-    --color-primary-800: #1a1f84;
-    --color-primary-900: #0f1453;
-    --color-primary-950: #060a2d;
+    --color-primary-source: var(--dc-color-brand);
+    --color-primary-50: color-mix(in srgb, var(--dc-color-brand) 8%, white);
+    --color-primary-100: color-mix(in srgb, var(--dc-color-brand) 18%, white);
+    --color-primary-200: color-mix(in srgb, var(--dc-color-brand) 32%, white);
+    --color-primary-300: color-mix(in srgb, var(--dc-color-brand) 50%, white);
+    --color-primary-400: color-mix(in srgb, var(--dc-color-brand) 72%, white);
+    --color-primary-500: var(--dc-color-brand);
+    --color-primary-600: color-mix(in srgb, var(--dc-color-brand) 72%, black);
+    --color-primary-700: color-mix(in srgb, var(--dc-color-brand) 58%, black);
+    --color-primary-800: color-mix(in srgb, var(--dc-color-brand) 42%, black);
+    --color-primary-900: color-mix(in srgb, var(--dc-color-brand) 28%, black);
+    --color-primary-950: color-mix(in srgb, var(--dc-color-brand) 16%, black);
     --color-neutral-background: #f7f7f8;
     --color-neutral-surface: #ffffff;
     --color-neutral-text: #18181b;
@@ -109,6 +109,7 @@
     --ds-color-text-on-primary: var(--color-neutral-white);
     --ds-color-text-danger-default: var(--color-state-error);
     --ds-color-border-primary-default: var(--ds-color-border);
+    --ds-color-border-subtle: color-mix(in srgb, var(--ds-color-text) 12%, var(--ds-color-surface));
     --ds-color-border-primary-focus: var(--color-primary-600);
     --ds-color-border-secondary-default: color-mix(in srgb, var(--ds-color-text) 30%, var(--ds-color-surface));
     --ds-color-border-danger-default: var(--color-state-error);
@@ -137,6 +138,14 @@
     --ds-color-status-warning: var(--color-state-warning);
     --ds-color-status-error: var(--color-state-error);
     --ds-color-status-info: var(--color-state-info);
+    --ds-color-status-success-foreground: color-mix(in srgb, var(--ds-color-status-success) 45%, var(--ds-color-text-primary-default));
+    --ds-color-status-warning-foreground: color-mix(in srgb, var(--ds-color-status-warning) 45%, var(--ds-color-text-primary-default));
+    --ds-color-status-error-foreground: color-mix(in srgb, var(--ds-color-status-error) 45%, var(--ds-color-text-primary-default));
+    --ds-color-status-info-foreground: color-mix(in srgb, var(--ds-color-status-info) 45%, var(--ds-color-text-primary-default));
+    --ds-color-bg-status-success-subtle: color-mix(in srgb, var(--ds-color-status-success) 10%, var(--ds-color-bg-surface-default));
+    --ds-color-bg-status-warning-subtle: color-mix(in srgb, var(--ds-color-status-warning) 10%, var(--ds-color-bg-surface-default));
+    --ds-color-bg-status-error-subtle: color-mix(in srgb, var(--ds-color-status-error) 10%, var(--ds-color-bg-surface-default));
+    --ds-color-bg-status-info-subtle: color-mix(in srgb, var(--ds-color-status-info) 10%, var(--ds-color-bg-surface-default));
     --ds-color-text-on-success: var(--color-neutral-white);
     --ds-color-text-on-warning: var(--color-neutral-white);
     --ds-color-text-on-error: var(--color-neutral-white);
@@ -169,6 +178,7 @@
     --ds-spacing-section-primary: var(--ds-space-xl);
     --ds-spacing-control-md-inline: var(--ds-space-md);
     --ds-spacing-control-md-block: var(--ds-space-xs);
+    --ds-control-height-md: calc(1.5em + var(--ds-spacing-control-md-block) + var(--ds-spacing-control-md-block) + 2px);
     --ds-radius-control-small: var(--ds-radius-sm);
     --ds-radius-control-primary: var(--ds-radius-md);
     --ds-radius-surface-primary: var(--ds-radius-xl);

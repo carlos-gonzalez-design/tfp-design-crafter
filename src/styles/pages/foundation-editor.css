@@ -169,6 +169,7 @@
   .foundation-color-sample--recommended { background: color-mix(in srgb, var(--dc-color-brand) 4%, var(--dc-color-raised)); }
   .foundation-color-sample--selected { border-color: var(--dc-color-brand); }
   .foundation-color-sample__tone { display: grid; width: 100%; min-width: 0; padding: 0; border: 0; border-radius: inherit; color: inherit; background: transparent; font: inherit; text-align: left; cursor: pointer; }
+  .foundation-color-sample__tone:focus-visible { position: relative; z-index: 1; outline: 3px solid var(--dc-color-brand); outline-offset: -3px; }
   .foundation-color-sample header { display: grid; gap: var(--dc-space-1); padding: var(--dc-space-3); }
   .foundation-color-sample__heading { display: flex; align-items: center; justify-content: space-between; gap: var(--dc-space-2); min-width: 0; }
   .foundation-color-sample header strong { flex: 0 0 auto; font-size: var(--dc-font-size-11); }

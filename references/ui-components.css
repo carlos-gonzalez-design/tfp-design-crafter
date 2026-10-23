@@ -44,7 +44,7 @@
 
   &--primary {
     background: var(--dc-color-brand);
-    color: var(--dc-color-white);
+    color: var(--dc-color-brand-ink);
     border-color: var(--dc-color-brand);
 
     &:hover,

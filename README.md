@@ -4,6 +4,12 @@
 
 La herramienta está pensada para diseñadores y desarrolladores que quieren entender la relación entre una decisión visual y su aplicación en la interfaz, sin tener que empezar por editar código a ciegas.
 
+# Enlaces de interés
+Github del proyecto: https://github.com/carlos-gonzalez-design/tfp-design-crafter
+Proyecto en Netlify: https://design-crafter-playground.netlify.app/
+
+## Estado actual del proyecto
+
 ## Qué puedes hacer
 
 - **Definir color:** partir de un color principal y generar una escala tonal; revisar muestras y escoger texto blanco o negro según el contraste.

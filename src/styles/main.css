@@ -11,6 +11,7 @@
 @import './components/dc-preview-tabs.css';
 @import './components/dc-controls.css';
 @import './components/token-value.css';
+@import './components/overlays.css';
 @import './design-system/ds-tokens.css';
 @import './design-system/ds-typography.css';
 @import './design-system/ds-actions.css';
@@ -22,6 +23,7 @@
 @import './preview/preview-components.css';
 @import './preview/preview-examples.css';
 @import './preview/playground.css';
+@import './preview/preview-overrides.css';
 @import './pages/foundation-editor.css';
 @import './pages/ui-kit.css';
 @import './pages/landing.css';

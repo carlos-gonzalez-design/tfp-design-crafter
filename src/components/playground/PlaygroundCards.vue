@@ -18,16 +18,16 @@ function announce(message) {
     <PlaygroundSectionHeader
       title-id="playground-cards-title"
       title="Cards"
-      description="Eleven purposeful compositions demonstrate content hierarchy beyond a repeated gallery."
+      description="Purpose-built compositions demonstrate content hierarchy without collapsing into a repeated gallery."
     />
     <div class="ds-card-showcase">
-      <DsCard title="Design foundations" description="A focused starting point for consistent product decisions." />
+      <DsCard class="ds-card-showcase__manifesto" title="Design foundations" description="A focused starting point for consistent product decisions." />
       <DsCard class="ds-card-showcase__image" variant="image" title="Layers of possibility" description="Give your ideas room to take shape." :image="cardImage" image-alt="Illustration of two floating geometric layers" />
-      <DsCard variant="product" title="Creator workspace" description="Everything your team needs to move from tokens to product." badge="Product">
+      <DsCard class="ds-card-showcase__product" variant="product" title="Creator workspace" description="Everything your team needs to move from tokens to product." badge="Product">
         <template #content><p class="ds-card__price">€24 <span>/ month</span></p></template>
         <DsButton @click="announce('Creator workspace details opened')">View details</DsButton>
       </DsCard>
-      <DsCard variant="profile" title="Maya Chen" description="Product designer · Lisbon">
+      <DsCard class="ds-card-showcase__profile" variant="profile" title="Maya Chen" description="Product designer · Lisbon">
         <template #media><div class="ds-card__avatar" aria-hidden="true">MC</div></template>
         <DsButton variant="outline" size="small" @click="announce('Maya Chen profile opened')">View profile</DsButton>
       </DsCard>

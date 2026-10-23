@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, watch } from 'vue'
+import { Download } from '@lucide/vue'
 import DcButton from '../ui/DcButton.vue'
 import { DS_PORTAL_ROOT } from '../design-system/dsContext.js'
 import PlaygroundActions from '../playground/PlaygroundActions.vue'
@@ -11,22 +12,19 @@ import PlaygroundOverview from '../playground/PlaygroundOverview.vue'
 import PlaygroundTypography from '../playground/PlaygroundTypography.vue'
 import { PLAYGROUND_CATEGORIES } from '../playground/componentCatalog.js'
 import {
-  COMPONENT_SIZES,
-  COMPONENT_VARIANTS,
-  DEFAULT_INSPECTOR_TOKENS,
   getComponentTokenNames,
   getInspectorTokenCategory,
-  getRadiusShapeLabel,
 } from '../../utils/componentInspector.js'
 import ComponentInspector from './ComponentInspector.vue'
 import PreviewNavigation from './PreviewNavigation.vue'
 
 const props = defineProps({
   cssVariables: { type: Object, required: true },
-  expanded: { type: Boolean, default: false },
+  theme: { type: String, default: 'light' },
+  syncing: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['expand', 'collapse'])
+const emit = defineEmits(['export'])
 
 const activeCategory = ref('typography')
 const previewCanvas = ref(null)
@@ -34,9 +32,11 @@ const portalRoot = ref(null)
 const inspectedElement = shallowRef(null)
 const inspectorSelection = ref(null)
 const selectionBounds = ref(null)
+const hasSyncTransition = ref(false)
 const categoryScrollPositions = new Map()
 const categorySelections = new Map()
 let selectionResizeObserver = null
+let syncPulseTimer
 const sections = Object.freeze({
   overview: PlaygroundOverview,
   typography: PlaygroundTypography,
@@ -47,6 +47,33 @@ const sections = Object.freeze({
   feedback: PlaygroundFeedback,
 })
 const activeSection = computed(() => sections[activeCategory.value] ?? PlaygroundOverview)
+const previewVariables = computed(() => props.theme === 'dark'
+  ? {
+      ...props.cssVariables,
+      '--color-neutral-background': '#111113',
+      '--color-neutral-surface': '#19191c',
+      '--color-neutral-text': '#f5f5f5',
+      '--color-neutral-muted': 'rgb(245 245 245 / 72%)',
+      '--color-neutral-border': 'color-mix(in srgb, #f5f5f5 18%, #19191c)',
+      '--color-neutral-white': '#f5f5f5',
+      '--ds-color-background': 'var(--color-neutral-background)',
+      '--ds-color-surface': 'var(--color-neutral-surface)',
+      '--ds-color-text': 'var(--color-neutral-text)',
+      '--ds-color-text-muted': 'var(--color-neutral-muted)',
+      '--ds-color-border': 'var(--color-neutral-border)',
+      '--ds-color-text-primary-default': 'var(--ds-color-text)',
+      '--ds-color-text-secondary-default': 'var(--ds-color-text-muted)',
+      '--ds-color-bg-canvas-default': 'var(--ds-color-background)',
+      '--ds-color-bg-surface-default': 'var(--ds-color-surface)',
+      '--ds-color-bg-surface-muted': 'color-mix(in srgb, var(--ds-color-text) 6%, var(--ds-color-surface))',
+      '--ds-color-border-subtle': 'color-mix(in srgb, var(--ds-color-text) 12%, var(--ds-color-surface))',
+      '--ds-color-border-secondary-default': 'color-mix(in srgb, var(--ds-color-text) 30%, var(--ds-color-surface))',
+      '--ds-color-button-secondary-background-default': 'var(--color-neutral-surface)',
+      '--ds-color-button-tertiary-background-hover': 'color-mix(in srgb, var(--color-primary-selected) 26%, var(--color-neutral-surface))',
+      '--ds-color-badge-brand-background': 'color-mix(in srgb, var(--color-primary-selected) 26%, var(--color-neutral-surface))',
+      '--ds-color-selection-background': 'color-mix(in srgb, var(--color-primary-selected) 26%, var(--color-neutral-surface))',
+    }
+  : props.cssVariables)
 
 provide(DS_PORTAL_ROOT, portalRoot)
 
@@ -85,6 +112,23 @@ function resolveColor(element, name) {
   return { color, value: colorToHex(color) }
 }
 
+function resolveComputedValue(element, name) {
+  const theme = element.closest('.ds-theme') ?? previewCanvas.value
+  if (!theme) return ''
+  const probe = document.createElement('span')
+  probe.style.cssText = `position:absolute;visibility:hidden;pointer-events:none;display:block;width:var(${name});height:0;`
+  theme.append(probe)
+  const value = getComputedStyle(probe).width
+  probe.remove()
+  return value
+}
+
+function isCalculatedValue(value) {
+  return /\b(?:calc|clamp|min|max)\s*\(/i.test(value)
+    || (value.match(/var\(/g) ?? []).length > 1
+    || value.length > 40
+}
+
 function readSelection(element) {
   const component = element.dataset.dsComponent
   const style = getComputedStyle(element)
@@ -92,30 +136,23 @@ function readSelection(element) {
   const tokenNames = getComponentTokenNames(component, variant) ?? DEFAULT_INSPECTOR_TOKENS
   return {
     component,
-    variant,
-    size: element.dataset.dsSize || 'default',
-    state: element.dataset.dsState || element.dataset.state || (element.disabled ? 'disabled' : 'default'),
-    connected: element.isConnected,
     tokens: tokenNames.map(name => {
       const category = getInspectorTokenCategory(name)
       const fallback = style.getPropertyValue(name).trim() || '—'
-      const source = String(props.cssVariables[name] ?? fallback).trim()
       if (category === 'color') {
         const resolved = resolveColor(element, name)
-        return { name, category, cssValue: source, value: resolved.value, swatch: resolved.color }
+        return { name, category, value: resolved.value, swatch: resolved.color }
       }
       const value = resolveTokenReference(name, fallback)
-      if (category === 'radius') {
-        return {
-          name,
-          category,
-          cssValue: source,
-          value,
-          reference: String(source).match(/var\((--[^)]+)\)/)?.[1] ?? 'Direct value',
-          shape: getRadiusShapeLabel(component, value),
-        }
+      const formula = String(props.cssVariables[name] ?? fallback)
+      const calculated = isCalculatedValue(formula)
+      return {
+        name,
+        category,
+        value: calculated ? formula : value,
+        formula: calculated ? formula : '',
+        resolvedValue: calculated ? resolveComputedValue(element, name) : '',
       }
-      return { name, category, cssValue: source, value }
     }),
   }
 }
@@ -168,23 +205,21 @@ function inspectComponent(event) {
   requestAnimationFrame(refreshSelection)
 }
 
-function updateInspectedComponent({ property, value }) {
-  const element = inspectedElement.value
-  const selection = inspectorSelection.value
-  if (!element || !selection) return
-  const options = property === 'variant' ? COMPONENT_VARIANTS[selection.component] : COMPONENT_SIZES[selection.component]
-  if (!options?.includes(value)) return
-  const prefix = selection.component === 'DsButton' ? 'ds-button' : selection.component === 'DsCard' ? 'ds-card' : 'ds-badge'
-  element.classList.remove(...options.map(option => `${prefix}--${option}`))
-  element.classList.add(`${prefix}--${value}`)
-  element.dataset[`ds${property.charAt(0).toUpperCase()}${property.slice(1)}`] = value
-  refreshSelection()
-}
-
 watch(() => props.cssVariables, async () => {
   await nextTick()
   refreshSelection()
 }, { deep: true, flush: 'post' })
+
+watch(() => props.theme, async () => {
+  await nextTick()
+  refreshSelection()
+}, { flush: 'post' })
+
+watch(() => props.syncing, () => {
+  hasSyncTransition.value = true
+  window.clearTimeout(syncPulseTimer)
+  syncPulseTimer = window.setTimeout(() => { hasSyncTransition.value = false }, 550)
+})
 
 function rememberCategoryScroll() {
   const canvas = previewCanvas.value
@@ -215,6 +250,7 @@ onMounted(() => window.addEventListener('resize', syncSelectionIndicator))
 onBeforeUnmount(() => {
   window.removeEventListener('resize', syncSelectionIndicator)
   selectionResizeObserver?.disconnect()
+  window.clearTimeout(syncPulseTimer)
 })
 </script>
 
@@ -228,13 +264,7 @@ onBeforeUnmount(() => {
             <h2 id="preview-title" class="preview-area__title">Canvas</h2>
           </div>
           <div class="preview-area__actions">
-            <span class="preview-area__status"><span></span> Synced</span>
-            <DcButton
-              class="preview-area__expand-action"
-              variant="secondary"
-              size="small"
-              @click="emit(expanded ? 'collapse' : 'expand')"
-            >{{ expanded ? 'Back to Editor' : 'Expand Preview' }}</DcButton>
+            <span class="preview-area__status" :class="syncing ? 'preview-area__status--saving' : 'preview-area__status--synced'"><span :key="syncing ? 'saving' : 'synced'" class="preview-area__status-dot" :class="{ 'preview-area__status-dot--pulse': hasSyncTransition }"></span><span aria-live="polite">{{ syncing ? 'Saving…' : 'Synced' }}</span></span>
           </div>
         </div>
         <div class="dc-preview-tabs">
@@ -243,7 +273,7 @@ onBeforeUnmount(() => {
             id="playground-panel"
             ref="previewCanvas"
             class="preview-canvas ds-preview ds-theme"
-            :style="cssVariables"
+            :style="previewVariables"
             role="tabpanel"
             :aria-labelledby="`playground-tab-${activeCategory}`"
             tabindex="0"
@@ -263,8 +293,14 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </div>
-      <ComponentInspector :selection="inspectorSelection" @change="updateInspectedComponent" />
+      <div class="preview-workspace__inspector-column">
+        <ComponentInspector :selection="inspectorSelection" />
+        <footer class="preview-export-action">
+          <p>Export the current tokens and components</p>
+          <DcButton class="export-css-button" variant="primary" size="medium" @click="emit('export')"><Download :size="16" aria-hidden="true" />Export CSS</DcButton>
+        </footer>
+      </div>
     </div>
-    <div ref="portalRoot" class="ds-portal-root ds-theme" :style="cssVariables" data-ds-portal-root></div>
+    <div ref="portalRoot" class="ds-portal-root ds-theme" :style="previewVariables" data-ds-portal-root></div>
   </section>
 </template>

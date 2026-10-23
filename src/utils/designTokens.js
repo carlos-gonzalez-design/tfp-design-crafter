@@ -267,7 +267,6 @@ export function createDesignTokens(foundations) {
       focus: 'source',
     })
   }
-  const recommendedForeground = getRecommendedPrimaryTone(primaryScale, normalizedColors.primary, normalizedColors.background)
   const foregroundMode = colors?.foregroundMode ?? 'auto'
   const foregroundColor = foregroundMode === 'white'
     ? '#FFFFFF'

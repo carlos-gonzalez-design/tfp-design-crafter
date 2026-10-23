@@ -1,117 +1,33 @@
 @layer components {
   .token-value {
-    container-type: inline-size;
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
     gap: var(--dc-space-2);
     width: 100%;
     min-width: 0;
+    color: var(--dc-color-ink);
+    text-align: right;
   }
 
-  .token-value--color {
-    grid-template-columns: 1.25rem minmax(0, 1fr);
-    align-items: start;
-  }
+  .token-value--color { gap: var(--dc-space-2); }
 
   .token-value__swatch {
-    position: relative;
     display: block;
-    width: 1.25rem;
-    aspect-ratio: 1;
     flex: 0 0 auto;
-    overflow: hidden;
+    width: 0.875rem;
+    height: 0.875rem;
     border: var(--dc-border-default);
     border-radius: var(--dc-radius-sm);
-    background-color: var(--dc-color-surface);
-    background-image: linear-gradient(45deg, var(--dc-color-border) 25%, transparent 25%), linear-gradient(-45deg, var(--dc-color-border) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--dc-color-border) 75%), linear-gradient(-45deg, transparent 75%, var(--dc-color-border) 75%);
-    background-position: 0 0, 0 var(--dc-space-1), var(--dc-space-1) calc(-1 * var(--dc-space-1)), calc(-1 * var(--dc-space-1)) 0;
-    background-size: var(--dc-space-2) var(--dc-space-2);
-    box-shadow: var(--dc-shadow-swatch-inset);
-  }
-
-  .token-value__swatch::after {
-    content: '';
-    position: absolute;
-    inset: 0;
     background: var(--token-value-color);
-  }
-
-  .token-value__body,
-  .token-value__summary-row,
-  .token-value__actions { min-width: 0; }
-
-  .token-value__body { display: grid; gap: var(--dc-space-2); }
-  .token-value .sr-only { inset: 0 auto auto 0; white-space: normal; overflow-wrap: anywhere; }
-
-  .token-value__summary-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--dc-space-2) var(--dc-space-3);
   }
 
   .token-value__summary {
     min-width: 0;
-    overflow-wrap: anywhere;
-    color: var(--dc-color-muted);
-    font-family: var(--dc-font-family-mono);
-    font-size: var(--dc-font-size-10);
-  }
-
-  .token-value__actions {
-    display: flex;
-    align-items: center;
-    flex: 0 0 auto;
-    flex-wrap: wrap;
-    gap: var(--dc-space-1);
-  }
-
-  .token-value__actions button {
-    min-height: 1.75rem;
-    padding: var(--dc-space-1) var(--dc-space-2);
-    border: var(--dc-border-default);
-    border-radius: var(--dc-radius-sm);
-    color: var(--dc-color-muted);
-    background: var(--dc-color-surface);
-    font: inherit;
-    font-size: var(--dc-font-size-9);
-    white-space: nowrap;
-    cursor: pointer;
-  }
-
-  .token-value__actions button:hover { color: var(--dc-color-ink); border-color: var(--dc-color-border-strong); }
-  .token-value__actions button:focus-visible { outline: 0; box-shadow: var(--dc-shadow-focus); }
-
-  .token-value__original {
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-    margin: 0;
-    padding: var(--dc-space-2);
-    overflow: visible;
-    border: var(--dc-border-default);
-    border-radius: var(--dc-radius-sm);
-    color: var(--dc-color-ink);
-    background: var(--dc-color-raised);
-    font-family: var(--dc-font-family-mono);
-    font-size: var(--dc-font-size-9);
-    line-height: 1.55;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-
-  .token-value__original code { font: inherit; white-space: inherit; overflow-wrap: inherit; }
-
-  @container (max-width: 16rem) {
-    .token-value__summary-row { align-items: stretch; }
-    .token-value__actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
-    .token-value__actions button { width: 100%; min-width: 0; white-space: normal; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .token-value__actions button { transition: none; }
+    color: inherit;
+    font: var(--dc-font-size-10)/1.45 'Geist Mono', var(--dc-font-family-mono);
+    text-align: inherit;
+    overflow-wrap: break-word;
+    word-break: normal;
   }
 }

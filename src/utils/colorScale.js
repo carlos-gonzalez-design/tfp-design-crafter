@@ -126,7 +126,13 @@ export function getPrimaryColorScale(source) {
   const normalizedSource = normalizeHexColor(source) ?? getBrandColor()
   const origin = srgbToOklch(normalizedSource)
   return PRIMARY_TONE_NAMES.map(name => {
-    const lightness = TONE_LIGHTNESS[name]
+    const index = PRIMARY_TONE_NAMES.indexOf(name)
+    const targetLightness = TONE_LIGHTNESS[name]
+    const lightness = index < 5 && origin.lightness > TONE_LIGHTNESS['400']
+      ? origin.lightness + ((5 - index) / 5) * (0.98 - origin.lightness)
+      : index > 5 && origin.lightness < TONE_LIGHTNESS['600']
+        ? origin.lightness - ((index - 5) / 5) * (origin.lightness - 0.02)
+        : targetLightness
     const mapped = gamutMappedOklch(lightness, origin.chroma * TONE_CHROMA_FACTOR[name], origin.hue)
     return {
       name,

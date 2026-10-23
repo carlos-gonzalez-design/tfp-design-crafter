@@ -2,9 +2,9 @@ export const COMPONENT_TOKEN_MAP = Object.freeze({
   DsTypography: ['--ds-font-family', '--ds-font-size-body-md', '--ds-color-text-primary-default', '--ds-line-height-body-md'],
   DsButton: ['--ds-color-button-primary-background-default', '--ds-color-button-primary-background-hover', '--ds-color-button-primary-text-default', '--ds-color-focus-ring', '--ds-font-size-button-primary', '--ds-spacing-control-md-inline', '--ds-spacing-control-md-block', '--ds-radius-button-primary'],
   DsToggleGroup: ['--ds-color-bg-fill-primary-default', '--ds-spacing-button-group-gap', '--ds-radius-control-primary'],
-  DsInput: ['--ds-color-control-background-default', '--ds-color-control-border-default', '--ds-font-size-control-md', '--ds-spacing-control-md-inline', '--ds-radius-input-primary'],
+  DsInput: ['--ds-color-control-background-default', '--ds-color-control-border-default', '--ds-font-size-control-md', '--ds-control-height-md', '--ds-spacing-control-md-inline', '--ds-radius-input-primary'],
   DsTextarea: ['--ds-color-control-background-default', '--ds-color-control-border-default', '--ds-font-size-control-md', '--ds-spacing-control-md-inline', '--ds-radius-input-primary'],
-  DsSelect: ['--ds-color-control-background-default', '--ds-color-control-border-default', '--ds-font-size-control-md', '--ds-spacing-control-md-inline', '--ds-radius-input-primary'],
+  DsSelect: ['--ds-color-control-background-default', '--ds-color-control-border-default', '--ds-font-size-control-md', '--ds-control-height-md', '--ds-spacing-control-md-inline', '--ds-radius-input-primary'],
   DsCheckbox: ['--ds-color-bg-fill-primary-default', '--ds-color-control-border-default', '--ds-radius-checkbox-primary'],
   DsRadioGroup: ['--ds-color-bg-fill-primary-default', '--ds-color-control-border-default', '--ds-font-size-body-md'],
   DsSwitch: ['--ds-color-bg-fill-primary-default', '--ds-color-border-secondary-default', '--ds-radius-switch-primary'],
@@ -54,14 +54,6 @@ export function getComponentTokenNames(component, variant) {
     ?? DEFAULT_INSPECTOR_TOKENS
 }
 
-export const COMPONENT_VARIANTS = Object.freeze({
-  DsButton: ['primary', 'secondary', 'tertiary', 'outline', 'ghost', 'destructive'],
-  DsCard: ['basic', 'image', 'product', 'profile', 'pricing', 'feature', 'statistic', 'horizontal', 'interactive', 'badge', 'cta'],
-  DsBadge: ['primary', 'secondary', 'neutral', 'success', 'danger'],
-})
-
-export const COMPONENT_SIZES = Object.freeze({ DsButton: ['small', 'medium', 'large'] })
-
 export const DEFAULT_INSPECTOR_TOKENS = Object.freeze([
   '--ds-color-text-primary-default',
   '--ds-font-size-body-md',
@@ -81,15 +73,4 @@ export function getInspectorTokenCategory(name) {
   if (name.includes('font-') || name.includes('line-height') || name.startsWith('--ds-text-')) return 'typography'
   if (name.includes('radius')) return 'radius'
   return 'spacing'
-}
-
-export function getRadiusShapeLabel(component, value) {
-  if (String(value).trim() === '50%') return 'Circle'
-  const pixels = Number.parseFloat(value)
-  if (pixels >= 999) return 'Pill'
-  if (pixels === 0) return component === 'DsCard' ? 'Sharp' : 'Square'
-  if (component === 'DsCard' && pixels === 20) return 'Soft'
-  if (pixels <= 6) return 'Subtle'
-  if (pixels <= 12) return 'Rounded'
-  return 'Soft'
 }
