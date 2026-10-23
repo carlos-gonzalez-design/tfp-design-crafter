@@ -58,8 +58,8 @@
 
   .landing-eyebrow {
     display: flex;
-    align-items: center;
-    gap: var(--dc-space-2px);
+    align-items: flex-start;
+    gap: var(--dc-space-4);
     margin: 0 0 var(--dc-space-4);
     color: var(--dc-color-muted);
     font-size: var(--dc-font-size-10);
@@ -220,7 +220,7 @@
 
   .landing-hero__inner { position: relative; }
   .landing-hero__copy { max-width: 49rem; margin-inline: auto; text-align: center; }
-  .landing-hero__copy .landing-eyebrow {justify-content: center;}
+  .landing-hero__copy .landing-eyebrow { justify-content: center; }
 
   .landing-hero h1 {
     font-size: clamp(3.25rem, 11vw, 6.5rem);
