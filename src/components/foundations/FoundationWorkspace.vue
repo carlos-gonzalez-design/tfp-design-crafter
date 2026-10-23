@@ -1,4 +1,5 @@
 <script setup>
+// Presenta controles y tokens de cada foundation; sus ediciones mutan el estado compartido que recalcula el preview.
 import { computed, nextTick, ref, watch } from 'vue'
 import DcButton from '../ui/DcButton.vue'
 import DcInput from '../ui/DcInput.vue'
@@ -123,6 +124,7 @@ const contrastSamples = computed(() => primaryColorScale.value.map(tone => {
       ? '#000000'
       : automatic.hex
   const ratio = getContrastRatio(tone.hex, foreground)
+  // Mantiene juntos el color de texto elegido, el ratio WCAG y el resultado AA de cada tono mostrado.
   return {
     ...tone,
     foreground,
@@ -145,6 +147,8 @@ const fontWeightOptions = computed(() => getAvailableFontWeights(props.foundatio
 const selectedSemanticField = computed(() => semanticFields.find(field => field.key === selectedSemantic.value))
 const foundationTokens = computed(() => getFoundationTokens(props.cssVariables, props.activeFoundation))
 const visibleCodeTokens = computed(() => showFullCss.value ? props.cssVariables : foundationTokens.value)
+
+// Sigue aliases var(...) hasta su valor final; el conjunto visited evita ciclos entre referencias CSS.
 function resolveTokenValue(name, visited = new Set()) {
   if (visited.has(name)) return props.cssVariables[name]
   visited.add(name)
@@ -212,6 +216,7 @@ function setPrimaryColor(value) {
   const normalized = normalizeHexColor(value)
   if (!normalized) return false
   props.foundations.colors.primary = normalized
+  // El color de origen se fija como tono 500; el valor auto vuelve a calcularse desde esa nueva escala.
   props.foundations.colors.primaryTone = '500'
   primaryHexDraft.value = normalized
   primaryHexError.value = ''
@@ -225,6 +230,7 @@ function selectPrimaryTone(name) {
 }
 
 function setUsePrimaryForeground(event) {
+  // Al elegir el color de marca como texto, vuelve a automático el selector para evitar modos contradictorios.
   foregroundUsePrimary.value = event.target.checked
   contrastTextMode.value = 'auto'
 }
@@ -244,6 +250,7 @@ async function navigateForegroundTones(event, index) {
       ? tones.length - 1
       : (index + (['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : -1) + tones.length) % tones.length
   const colorScale = event.currentTarget.closest('.foundation-color-scale')
+  // Espera al DOM reactivo antes de mover el foco al swatch seleccionado.
   selectPrimaryTone(tones[nextIndex].name)
   await nextTick()
   colorScale?.querySelectorAll('.foundation-color-sample__tone')[nextIndex]?.focus()
@@ -274,10 +281,12 @@ function updateBaseSize(event) {
   }
 
   baseSizeError.value = ''
+  // Solo se propaga un tamaño válido; la escala y la vista previa no reciben valores parciales del borrador.
   props.foundations.typography.baseSize = value
 }
 
 function commitBaseSize() {
+  // Si el borrador es inválido al salir del campo, restaura el último valor confirmado.
   if (!baseSizeError.value) return
   baseSizeDraft.value = String(props.foundations.typography.baseSize)
   baseSizeError.value = ''
@@ -287,6 +296,7 @@ function updateFontFamily(fontFamily) {
   props.foundations.typography.fontFamily = fontFamily
   const availableWeights = getAvailableFontWeights(fontFamily)
 
+  // Corrige los estilos semánticos cuyo peso deje de estar disponible en la nueva familia.
   for (const style of Object.values(props.foundations.typography.semanticStyles)) {
     if (availableWeights.includes(style.weight)) continue
     style.weight = availableWeights.reduce((closest, option) => (

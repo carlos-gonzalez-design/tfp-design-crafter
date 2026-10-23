@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
+// Automatiza capturas de las cinco foundations en ambos temas mediante Chrome DevTools Protocol.
 const cdpUrl = process.env.CDP_URL || 'http://127.0.0.1:9230'
 const appUrl = process.env.APP_URL || 'http://127.0.0.1:5173/app'
 const outputDirectory = resolve('public/images/dashboard-showcase')
@@ -32,6 +33,7 @@ socket.addEventListener('message', event => {
 })
 
 function call(method, params = {}) {
+  // Asocia cada mensaje CDP a su promesa hasta que Chrome responda con el mismo identificador.
   return new Promise((resolveCall, reject) => {
     const id = ++nextId
     pending.set(id, { resolve: resolveCall, reject })

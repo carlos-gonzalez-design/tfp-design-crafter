@@ -1,4 +1,5 @@
 <script setup>
+// Permite combinar paleta, tipografía y radios para mostrar en vivo cómo una configuración produce tokens y componentes.
 import { computed, ref } from 'vue'
 import DsButton from '../design-system/actions/DsButton.vue'
 import DsCard from '../design-system/cards/DsCard.vue'
@@ -40,6 +41,7 @@ const selectedTypography = ref('geist')
 const selectedRadius = ref('subtle')
 const palette = computed(() => palettes.find(option => option.id === selectedPalette.value) ?? palettes[0])
 const previewTokens = computed(() => {
+  // Recompone foundations aisladas y reutiliza la fábrica de tokens para mantener la demo reactiva.
   const foundations = createDefaultFoundations()
   foundations.colors = {
     ...foundations.colors,

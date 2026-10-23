@@ -1,3 +1,4 @@
+// Catálogo de categorías que conecta la navegación del canvas con sus paneles de demostración.
 export const PLAYGROUND_CATEGORIES = Object.freeze([
   { id: 'overview', label: 'Overview' },
   { id: 'typography', label: 'Typography' },

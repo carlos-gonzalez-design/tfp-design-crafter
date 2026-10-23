@@ -1,4 +1,5 @@
 <script setup>
+// Reúne ejemplos interactivos del sistema y representa la escala de espaciado generada por el editor.
 import { computed, ref } from 'vue'
 import DcButton from '../components/ui/DcButton.vue'
 import DcInput from '../components/ui/DcInput.vue'
@@ -66,6 +67,7 @@ const patternSize = ref(32)
 const zoomLabel = computed(() => `${zoom.value}%`)
 
 function changeZoom(amount) {
+  // Limita el zoom de la demostración para mantener siempre controles y contenido accesibles.
   zoom.value = Math.min(200, Math.max(25, zoom.value + amount))
 }
 </script>

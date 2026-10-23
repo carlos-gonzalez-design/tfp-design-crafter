@@ -1,4 +1,5 @@
 <script setup>
+// Gestiona el tema persistente, la navegación interna y las animaciones de entrada respetando movimiento reducido.
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import CssExportShowcase from '../components/landing/CssExportShowcase.vue'
 import FoundationsShowcase from '../components/landing/FoundationsShowcase.vue'
@@ -18,6 +19,7 @@ watch(theme, value => {
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', value === 'dark' ? '#111113' : '#fafaf9')
 }, { immediate: true })
 
+// Intercepta solo enlaces internos ordinarios; combinaciones de teclas conservan el comportamiento del navegador.
 function handleNavigation(event) {
   const link = event.target.closest?.('a[data-app-link]')
   if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
@@ -32,6 +34,7 @@ onMounted(() => {
   document.querySelector('.landing')?.classList.add('is-motion-ready')
 
   if (reducedMotion || !('IntersectionObserver' in window)) {
+    // Sin animación solicitada o sin soporte, el contenido queda visible desde el inicio.
     elements.forEach(element => element.classList.add('is-visible'))
     return
   }

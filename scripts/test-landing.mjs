@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
 
+// Verifica la landing, el recorrido sincronizado con scroll, sus alternativas accesibles y el flujo PWA.
 const cdpUrl = process.env.CDP_URL || 'http://127.0.0.1:9230'
 const appUrl = process.env.APP_URL || 'http://127.0.0.1:5173/'
 const pages = await (await fetch(`${cdpUrl}/json`)).json()
@@ -26,6 +27,7 @@ socket.addEventListener('message', event => {
 })
 
 function call(method, params = {}) {
+  // Gestiona las solicitudes y eventos CDP sobre una conexión WebSocket compartida.
   return new Promise((resolve, reject) => {
     const id = ++nextId
     pending.set(id, { resolve, reject })

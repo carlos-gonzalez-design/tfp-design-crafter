@@ -1,3 +1,4 @@
+// Mantiene una caché versionada del shell y sirve recursos locales desde caché cuando no hay red.
 const CACHE_NAME = 'design-crafter-v1'
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.svg', '/apple-touch-icon.png']
 
@@ -7,6 +8,7 @@ self.addEventListener('install', event => {
 })
 
 self.addEventListener('activate', event => {
+  // Elimina versiones antiguas de esta aplicación antes de tomar el control de las pestañas abiertas.
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(keys.filter(key => key.startsWith('design-crafter-') && key !== CACHE_NAME).map(key => caches.delete(key))))
@@ -20,6 +22,7 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET' || url.origin !== self.location.origin) return
 
   if (request.mode === 'navigate') {
+    // Guarda la última página principal válida para que las rutas de la SPA abran sin conexión.
     event.respondWith((async () => {
       try {
         const response = await fetch(request)
@@ -32,6 +35,7 @@ self.addEventListener('fetch', event => {
     return
   }
 
+  // Para assets, prioriza la copia local y almacena en caché las respuestas de red satisfactorias.
   event.respondWith((async () => {
     const cached = await caches.match(request)
     if (cached) return cached

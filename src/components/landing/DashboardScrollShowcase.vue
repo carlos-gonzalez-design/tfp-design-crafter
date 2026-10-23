@@ -1,4 +1,5 @@
 <script setup>
+// Sincroniza el frame del recorrido con el scroll en escritorio y ofrece navegación estática en móvil o con movimiento reducido.
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { dashboardShowcaseFrames } from '../../data/dashboardShowcaseFrames.js'
 
@@ -19,6 +20,7 @@ const themedFrames = computed(() => dashboardShowcaseFrames.map(frame => ({
 })))
 const progressPercent = computed(() => `${Math.round(progress.value * 10000) / 100}%`)
 
+// Limita progreso y opacidad al intervalo visible durante el recorrido.
 function clamp(value, minimum = 0, maximum = 1) {
   return Math.min(maximum, Math.max(minimum, value))
 }
@@ -34,6 +36,7 @@ function updateShowcase() {
 }
 
 function requestUpdate() {
+  // Agrupa eventos de scroll en un cálculo por frame para evitar trabajo repetido durante el repintado.
   if (!animationFrame) animationFrame = window.requestAnimationFrame(updateShowcase)
 }
 

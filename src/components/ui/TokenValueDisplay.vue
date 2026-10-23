@@ -1,4 +1,5 @@
 <script setup>
+// Presenta el valor efectivo de un alias cuando ya está resuelto y conserva la referencia si no lo está.
 import { computed } from 'vue'
 
 const props = defineProps({

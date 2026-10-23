@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
 
+// Comprueba en un navegador real el editor, sus tokens reactivos, la vista previa, la accesibilidad y la exportación.
 const cdpUrl = process.env.CDP_URL || 'http://127.0.0.1:9230'
 const appUrl = process.env.APP_URL || 'http://127.0.0.1:5173/app'
 const pages = await (await fetch(`${cdpUrl}/json`)).json()
@@ -26,6 +27,7 @@ socket.addEventListener('message', event => {
 })
 
 function call(method, params = {}) {
+  // Multiplexa llamadas del protocolo CDP y recoge errores de consola para fallar con evidencia de runtime.
   return new Promise((resolve, reject) => {
     const id = ++nextId
     pending.set(id, { resolve, reject })

@@ -1,3 +1,4 @@
+// Contenido y recursos de cada vista del recorrido visual de la página de inicio.
 export const dashboardShowcaseFrames = Object.freeze([
   {
     id: 'overview',

@@ -1,4 +1,5 @@
 <script setup>
+// Muestra ejemplos de las capas CSS, resalta selectores y propiedades, y permite copiar el código visible.
 import { computed, ref } from 'vue'
 import DsButton from '../design-system/actions/DsButton.vue'
 import DsTabs from '../design-system/navigation/DsTabs.vue'
@@ -54,6 +55,7 @@ const exportLabel = computed(() => tabs.find(tab => tab.value === activeTab.valu
 const previewTokens = createDesignTokens(createDefaultFoundations())
 
 function escapeHtml(value) {
+  // Escapa primero el contenido antes de añadir marcado para el resaltado sintáctico.
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 }
 
@@ -72,6 +74,7 @@ async function copyCss() {
     if (!navigator.clipboard?.writeText) throw new Error('Clipboard API unavailable')
     await navigator.clipboard.writeText(currentCode.value)
   } catch {
+    // El textarea temporal ofrece una alternativa cuando el navegador no expone Clipboard API.
     const textarea = document.createElement('textarea')
     textarea.value = currentCode.value
     textarea.setAttribute('readonly', '')

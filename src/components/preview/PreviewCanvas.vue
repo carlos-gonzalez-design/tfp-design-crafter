@@ -1,4 +1,5 @@
 <script setup>
+// Renderiza el playground con tokens y tema actuales, y permite inspeccionar componentes y sus valores calculados.
 import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, watch } from 'vue'
 import { Download } from '@lucide/vue'
 import DcButton from '../ui/DcButton.vue'
@@ -49,6 +50,7 @@ const sections = Object.freeze({
 const activeSection = computed(() => sections[activeCategory.value] ?? PlaygroundOverview)
 const previewVariables = computed(() => props.theme === 'dark'
   ? {
+      // Aplica alias nocturnos localmente al canvas; el estado base y la exportación siguen usando las foundations elegidas.
       ...props.cssVariables,
       '--color-neutral-background': '#111113',
       '--color-neutral-surface': '#19191c',
@@ -75,9 +77,11 @@ const previewVariables = computed(() => props.theme === 'dark'
     }
   : props.cssVariables)
 
+// Los overlays se montan aquí para heredar los tokens y el tema aplicados al canvas.
 provide(DS_PORTAL_ROOT, portalRoot)
 
 function resolveTokenReference(name, fallback, visited = new Set()) {
+  // Sigue referencias CSS encadenadas y se detiene si detecta un ciclo o una variable sin valor.
   if (visited.has(name)) return fallback
   visited.add(name)
   const value = props.cssVariables[name] ?? fallback
@@ -86,6 +90,7 @@ function resolveTokenReference(name, fallback, visited = new Set()) {
 }
 
 function colorToHex(color) {
+  // Normaliza colores calculados por el navegador a hexadecimal, conservando el canal alfa si es translúcido.
   const rgb = color.match(/^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:\s*[,/]\s*([\d.]+))?\s*\)$/i)
   const srgb = color.match(/^color\(srgb\s+([\d.-]+)\s+([\d.-]+)\s+([\d.-]+)(?:\s*\/\s*([\d.]+))?\s*\)$/i)
   const match = rgb ?? srgb
@@ -105,6 +110,7 @@ function resolveColor(element, name) {
   const theme = element.closest('.ds-theme') ?? previewCanvas.value
   if (!theme) return { color: 'transparent', value: 'transparent' }
   const resolver = document.createElement('span')
+  // Un nodo temporal permite consultar el color ya resuelto por el navegador dentro del tema activo.
   resolver.style.cssText = `position:absolute;visibility:hidden;pointer-events:none;color:var(${name});`
   theme.append(resolver)
   const color = getComputedStyle(resolver).color
@@ -146,6 +152,7 @@ function readSelection(element) {
       const value = resolveTokenReference(name, fallback)
       const formula = String(props.cssVariables[name] ?? fallback)
       const calculated = isCalculatedValue(formula)
+      // En fórmulas conserva el alias original y muestra por separado la medida final calculada por el navegador.
       return {
         name,
         category,
@@ -195,6 +202,7 @@ function refreshSelection() {
 }
 
 function inspectComponent(event) {
+  // La delegación captura clic y foco sin instalar listeners en cada componente de muestra.
   const element = event.target.closest?.('[data-ds-component]')
   if (!element || !event.currentTarget.contains(element)) return
   inspectedElement.value = element
@@ -206,6 +214,7 @@ function inspectComponent(event) {
 }
 
 watch(() => props.cssVariables, async () => {
+  // Tras regenerar tokens, vuelve a leer los estilos calculados que muestra el inspector.
   await nextTick()
   refreshSelection()
 }, { deep: true, flush: 'post' })
@@ -228,6 +237,7 @@ function rememberCategoryScroll() {
 }
 
 watch(activeCategory, async (category, previousCategory) => {
+  // Cada categoría conserva scroll y selección propios aunque su contenido salga temporalmente del DOM.
   const canvas = previewCanvas.value
   if (canvas && previousCategory) categoryScrollPositions.set(previousCategory, canvas.scrollTop)
   inspectedElement.value = null

@@ -1,4 +1,5 @@
 <script setup>
+// Mantiene los valores de ejemplo del formulario y comunica las acciones de guardar o restaurar.
 import { ref } from 'vue'
 import { Search } from '@lucide/vue'
 import DsButton from '../design-system/actions/DsButton.vue'
@@ -41,6 +42,7 @@ function saveProfile() {
 }
 
 function resetForm() {
+  // Restaura en conjunto los valores iniciales para que el ejemplo vuelva a su estado demostrativo.
   name.value = 'Alex Morgan'
   email.value = 'alex@example.com'
   password.value = ''

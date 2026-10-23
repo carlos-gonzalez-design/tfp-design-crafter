@@ -7,7 +7,7 @@ import {
 } from './colorScale.js'
 import { getBrandColor } from './brand.js'
 
-// One transformation feeds the scoped canvas, UI Kit and CSS export.
+// Centraliza escalas y reglas de foundations; una sola transformación alimenta el canvas, el UI Kit y la exportación.
 export const SPACING_SCALE = Object.freeze([
   { name: 'none', value: 0 },
   { name: '4xs', value: 2 },
@@ -165,6 +165,7 @@ export function getTypographyScale(typography) {
     : 16
   const requestedRatio = Number(typography.scaleRatio)
   const ratio = Number.isFinite(requestedRatio) && requestedRatio > 1 ? requestedRatio : 1.25
+  // Los pasos negativos y positivos aplican la misma razón modular alrededor del tamaño base.
   return TYPE_PRIMITIVE_SCALE.map(({ name, step }) => {
     const rawValue = baseSize * ratio ** step
     return {
@@ -186,6 +187,7 @@ export function getTypographySemanticScale(typography) {
     const configuredStyle = typography.semanticStyles?.[name] ?? {}
     const primitive = byName.get(configuredStyle.size) ?? byName.get(definition.defaultSize)
     const requestedWeight = String(configuredStyle.weight ?? definition.defaultWeight)
+    // Si la familia no ofrece el peso solicitado, usa el peso disponible numéricamente más cercano.
     const weight = availableWeights.includes(requestedWeight)
       ? requestedWeight
       : availableWeights.reduce((closest, option) => (
@@ -254,6 +256,7 @@ export function createDesignTokens(foundations) {
   const selectedPrimaryTone = primaryTone ?? getRecommendedPrimaryTone(primaryScale, normalizedColors.primary, normalizedColors.background)
   const primaryRoles = getPrimaryColorRoles(primaryScale, normalizedColors, primaryTone?.name ?? 'auto')
   if (colors?.foregroundUsePrimary) {
+    // En este modo el color de marca ocupa los roles de acción y enlace, pero el texto sobre cada color sigue calculándose.
     const sourceText = getAccessibleTextColor(normalizedColors.primary)
     Object.assign(primaryRoles, {
       action: 'source',
@@ -477,6 +480,7 @@ function getTokenType(name) {
 }
 
 export function createDesignTokenDocument(foundations) {
+  // Genera una representación serializable con nivel, tipo y referencia para inspección o integración externa.
   const cssVariables = createDesignTokens(foundations)
   return {
     version: 1,

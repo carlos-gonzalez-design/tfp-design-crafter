@@ -21,6 +21,7 @@ function handleKeydown(event, index) {
   if (event.key === 'Home') nextIndex = 0
   if (event.key === 'End') nextIndex = props.categories.length - 1
 
+  // Mantiene el patrón de pestañas: un elemento tabulable y foco sincronizado con la selección.
   activate(props.categories[nextIndex])
   event.currentTarget.parentElement.children[nextIndex]?.focus()
 }

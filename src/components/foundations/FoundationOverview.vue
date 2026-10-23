@@ -1,4 +1,5 @@
 <script setup>
+// Resume las foundations actuales en una vista compacta y calcula muestras derivadas del mismo sistema de tokens.
 import { computed } from 'vue'
 import DcButton from '../ui/DcButton.vue'
 import { getPrimaryColorScale, getRecommendedPrimaryTone } from '../../utils/colorScale.js'
@@ -25,6 +26,7 @@ const ratioLabel = computed(() => TYPE_SCALE_RATIOS.find(
 const appliedSpacing = computed(() => getAppliedSpacing(props.foundations.spacing.density))
 const overviewPrimaryScale = computed(() => getPrimaryColorScale(props.foundations.colors.primary))
 const overviewSelectedTone = computed(() => {
+  // En modo de primer plano de marca se muestra el origen; en otro caso se respeta o recomienda un tono.
   if (props.foundations.colors.foregroundUsePrimary && props.foundations.colors.primaryTone === 'auto') {
     return { name: 'source', hex: props.foundations.colors.primary }
   }

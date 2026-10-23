@@ -1,4 +1,5 @@
 <script setup>
+// Detecta disponibilidad e instalación PWA, y usa instrucciones manuales cuando el navegador no ofrece prompt.
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const installPrompt = ref(null)
@@ -19,6 +20,7 @@ function captureInstallPrompt(event) {
 }
 
 function detectPwaSupport() {
+  // La promoción requiere contexto seguro y un service worker activo.
   if (!window.isSecureContext || !('serviceWorker' in navigator)) return
   navigator.serviceWorker.ready.then(registration => {
     isPwaReady.value = Boolean(registration.active)
@@ -37,6 +39,7 @@ async function install() {
   }
 
   const promptEvent = installPrompt.value
+  // El navegador solo permite abrir el diálogo tras una acción explícita del usuario.
   installPrompt.value = null
   await promptEvent.prompt()
   const choice = await promptEvent.userChoice

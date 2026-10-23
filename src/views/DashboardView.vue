@@ -1,4 +1,5 @@
 <script setup>
+// Coordina el estado de foundations y conecta sus tokens derivados con el editor, la vista previa y los diálogos.
 import { computed, onMounted, reactive, ref } from 'vue'
 import FoundationPanel from '../components/foundations/FoundationPanel.vue'
 import FoundationOverview from '../components/foundations/FoundationOverview.vue'
@@ -28,6 +29,7 @@ const isExportOpen = ref(false)
 const exportPreferences = reactive({ unit: 'rem', includeComments: true, stylesheetName: 'design-crafter' })
 const syncStatus = useSyncStatus(foundations)
 const isUiKit = computed(() => props.currentPath.replace(/\/$/, '') === '/ui-kit')
+// Cada cambio en foundations regenera el mismo mapa de tokens consumido por editor, preview y exportación.
 const cssVariables = computed(() => createDesignTokens(foundations))
 
 function navigate(event, path) {
@@ -48,10 +50,12 @@ function updateExportPreferences(value) {
 
 function closeExport() {
   isExportOpen.value = false
+  // Devuelve el foco al control que abrió el diálogo tras actualizar el DOM.
   requestAnimationFrame(() => document.querySelector('.export-css-button')?.focus())
 }
 
 function resetFoundations() {
+  // Restaura los valores en el objeto reactivo existente para que todos los consumidores sigan conectados.
   const defaults = createDefaultFoundations()
   for (const key of Object.keys(foundations)) {
     if (typeof foundations[key] === 'object') Object.assign(foundations[key], defaults[key])

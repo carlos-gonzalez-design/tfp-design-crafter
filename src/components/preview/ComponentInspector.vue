@@ -1,4 +1,5 @@
 <script setup>
+// Agrupa los tokens de la selección activa para que el inspector solo muestre categorías con contenido.
 import { computed } from 'vue'
 import ComponentInspectorToken from './ComponentInspectorToken.vue'
 import { INSPECTOR_TOKEN_CATEGORIES } from '../../utils/componentInspector.js'

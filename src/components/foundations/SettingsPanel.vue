@@ -1,4 +1,5 @@
 <script setup>
+// Gestiona preferencias persistentes y el ciclo accesible del diálogo de ajustes.
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Trash2, X } from '@lucide/vue'
 import DcButton from '../ui/DcButton.vue'
@@ -24,6 +25,7 @@ function updateProjectName(value) {
 }
 
 function updatePreference(key, value) {
+  // Emite una copia para que el padre persista preferencias sin mutar la prop recibida.
   emit('update:export-preferences', { ...props.exportPreferences, [key]: value })
 }
 
@@ -39,6 +41,7 @@ function handleEscape(event) {
 }
 
 onMounted(async () => {
+  // Abre el diálogo nativo y sitúa el foco en el primer campo cuando el contenido ya está montado.
   document.addEventListener('keydown', handleEscape)
   await nextTick()
   dialog.value?.showModal()

@@ -1,4 +1,5 @@
 <script setup>
+// Adapta el valor en arreglo que usa Reka UI al modelo numérico de los controles del dashboard.
 import { computed } from 'vue'
 import { SliderRoot, SliderTrack, SliderRange, SliderThumb } from 'reka-ui'
 

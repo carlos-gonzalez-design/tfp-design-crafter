@@ -1,4 +1,5 @@
 <script setup>
+// Genera CSS desde los tokens recibidos y gestiona copia, descarga y foco del diálogo de exportación.
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Braces, Check, Copy, Download, FileText, Layers, X } from '@lucide/vue'
 import DcButton from '../ui/DcButton.vue'
@@ -23,6 +24,7 @@ const generatedCss = computed(() => generateCssExport({
   projectName: props.projectName,
   ...props.preferences,
 }))
+// El tipo seleccionado determina el sufijo del archivo con la misma normalización usada en Ajustes.
 const filenames = computed(() => getStylesheetFilenames(props.stylesheetName))
 const filename = computed(() => filenames.value[selectedType.value])
 
@@ -34,6 +36,7 @@ async function copyCss() {
   copiedTimer = window.setTimeout(() => { copied.value = false }, 1800)
 }
 function downloadCss() {
+  // La descarga se crea en el navegador a partir del CSS generado en memoria.
   const blob = new Blob([generatedCss.value], { type: 'text/css;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
