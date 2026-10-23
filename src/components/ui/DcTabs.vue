@@ -1,4 +1,5 @@
 <script setup>
+// Implementa pestañas controladas por v-model y navegación de foco con flechas, Inicio y Fin.
 const props = defineProps({
   modelValue: { type: String, required: true },
   tabs: { type: Array, required: true },

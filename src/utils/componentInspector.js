@@ -1,3 +1,4 @@
+// Relaciona cada componente y variante con los tokens que el inspector debe mostrar en el canvas.
 export const COMPONENT_TOKEN_MAP = Object.freeze({
   DsTypography: ['--ds-font-family', '--ds-font-size-body-md', '--ds-color-text-primary-default', '--ds-line-height-body-md'],
   DsButton: ['--ds-color-button-primary-background-default', '--ds-color-button-primary-background-hover', '--ds-color-button-primary-text-default', '--ds-color-focus-ring', '--ds-font-size-button-primary', '--ds-spacing-control-md-inline', '--ds-spacing-control-md-block', '--ds-radius-button-primary'],
@@ -49,6 +50,7 @@ const COMPONENT_VARIANT_TOKEN_MAP = Object.freeze({
 })
 
 export function getComponentTokenNames(component, variant) {
+  // Prioriza el mapa específico de variante y usa los tokens generales o comunes si no existe.
   return COMPONENT_VARIANT_TOKEN_MAP[component]?.[variant]
     ?? COMPONENT_TOKEN_MAP[component]
     ?? DEFAULT_INSPECTOR_TOKENS
@@ -69,6 +71,7 @@ export const INSPECTOR_TOKEN_CATEGORIES = Object.freeze([
 ])
 
 export function getInspectorTokenCategory(name) {
+  // Agrupa por prefijos y convenciones de nombres para presentar tokens por tipo en el inspector.
   if (name.startsWith('--ds-color-') || name.startsWith('--color-')) return 'color'
   if (name.includes('font-') || name.includes('line-height') || name.startsWith('--ds-text-')) return 'typography'
   if (name.includes('radius')) return 'radius'

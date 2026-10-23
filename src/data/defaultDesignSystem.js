@@ -1,6 +1,8 @@
 import { getBrandColor } from '../utils/brand.js'
 
+// Proporciona fábricas de estado inicial para que cada espacio de trabajo tenga objetos reactivos independientes.
 export function createDefaultFoundations() {
+  // Se devuelve un objeto nuevo para evitar compartir estado entre la aplicación y las demostraciones.
   return {
     colors: {
       primary: getBrandColor(),

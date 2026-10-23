@@ -8,9 +8,11 @@ import exampleStyles from '../styles/preview/preview-examples.css?inline'
 import playgroundStyles from '../styles/preview/playground.css?inline'
 import { getDesignTokenLevel } from './designTokens.js'
 
+// Construye hojas CSS de tokens o una versión completa con estilos de componentes y adaptación de tema oscuro.
 const componentStyles = [typographyStyles, actionStyles, formStyles, cardStyles, navigationStyles, feedbackStyles, exampleStyles, playgroundStyles]
 
 export function normalizeStylesheetName(value = '') {
+  // Normaliza el nombre para usarlo de forma segura y consistente en ambos archivos descargados.
   const normalized = String(value)
     .trim()
     .toLowerCase()
@@ -31,6 +33,7 @@ export function getStylesheetFilenames(value = '') {
 }
 
 function formatValue(value, unit) {
+  // Solo convierte medidas en px; los valores no dimensionales y referencias CSS quedan intactos.
   if (unit === 'px') return value
   return String(value).replace(/(-?\d*\.?\d+)px\b/g, (_, pixels) => {
     const rem = Number(pixels) / 16
@@ -43,6 +46,7 @@ export function generateCssExport({ variables, type, theme = 'light', unit = 're
   const metadataName = projectName.replace(/\*\//g, '* /')
   const tokens = Object.entries(variables)
   const primitiveTokens = tokens.filter(([name]) => getDesignTokenLevel(name) === 'Primitive')
+  // Separa los valores base de sus alias para que el CSS exportado conserve la jerarquía del sistema.
   const semanticTokens = tokens.filter(([name]) => getDesignTokenLevel(name) !== 'Primitive')
   const declarations = entries => entries
     .map(([name, value]) => `  ${name}: ${formatValue(value, unit)};`)
@@ -65,6 +69,7 @@ export function generateCssExport({ variables, type, theme = 'light', unit = 're
       comment('6. Dark mode semantic adaptation'),
     )
     sections.push(
+      // Los aliases semánticos se sobreescriben para ambos disparadores de modo oscuro que usa la aplicación.
       `@media (prefers-color-scheme: dark) {\n  :root, .ds-theme--dark {\n    --color-neutral-background: #111113;\n    --color-neutral-surface: #19191c;\n    --color-neutral-text: #f5f5f5;\n    --color-neutral-border: color-mix(in srgb, #f5f5f5 18%, #19191c);\n    --ds-color-background: var(--color-neutral-background);\n    --ds-color-surface: var(--color-neutral-surface);\n    --ds-color-text: var(--color-neutral-text);\n    --ds-color-text-primary-default: var(--color-neutral-text);\n    --ds-color-text-secondary-default: #a1a1aa;\n    --ds-color-border: var(--color-neutral-border);\n  }\n}\n.dc-theme--dark {\n  --color-neutral-background: #111113;\n  --color-neutral-surface: #19191c;\n  --color-neutral-text: #f5f5f5;\n  --color-neutral-border: color-mix(in srgb, #f5f5f5 18%, #19191c);\n  --ds-color-background: var(--color-neutral-background);\n  --ds-color-surface: var(--color-neutral-surface);\n  --ds-color-text: var(--color-neutral-text);\n  --ds-color-text-primary-default: var(--color-neutral-text);\n  --ds-color-text-secondary-default: #a1a1aa;\n  --ds-color-border: var(--color-neutral-border);\n}`,
     )
   }

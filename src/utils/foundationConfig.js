@@ -1,3 +1,4 @@
+// Define las secciones visibles del editor y las pestañas compartidas por todos sus paneles.
 export const FOUNDATION_SECTIONS = Object.freeze([
   {
     id: 'colors',

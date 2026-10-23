@@ -1,4 +1,5 @@
 <script setup>
+// Convierte el mapa reactivo de tokens en una muestra CSS y puede añadir reglas de componentes vinculadas a esos tokens.
 import { computed } from 'vue'
 
 const props = defineProps({

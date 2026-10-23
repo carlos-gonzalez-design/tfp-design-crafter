@@ -1,4 +1,5 @@
 <script setup>
+// Presenta controles y tokens de cada foundation; sus ediciones mutan el estado compartido que recalcula el preview.
 import { computed, nextTick, ref, watch } from 'vue'
 import DcButton from '../ui/DcButton.vue'
 import DcInput from '../ui/DcInput.vue'
@@ -100,31 +101,30 @@ const appliedSpacing = computed(() => {
   const assignments = getAppliedSpacing(props.foundations.spacing.density)
   return appliedSpacingFields.map(field => ({ ...field, ...assignments[field.key] }))
 })
-const primaryColorScale = computed(() => getPrimaryColorScale(props.foundations.colors.primary, props.foundations.colors.primaryTone))
+const primaryColorScale = computed(() => getPrimaryColorScale(props.foundations.colors.primary))
 const recommendedTone = computed(() => {
   return getRecommendedPrimaryTone(primaryColorScale.value, props.foundations.colors.primary, props.foundations.colors.background)
 })
 const recommendedToneRatio = computed(() => getContrastRatio(recommendedTone.value.hex, props.foundations.colors.background))
 const selectedPrimaryTone = computed(() => primaryColorScale.value.find(tone => tone.name === String(props.foundations.colors.primaryTone)) ?? recommendedTone.value)
-const effectiveForeground = computed(() => foregroundUsePrimary.value
-  ? props.foundations.colors.primary
-  : contrastTextMode.value === 'white'
-    ? '#FFFFFF'
-    : contrastTextMode.value === 'black'
-      ? '#000000'
-      : recommendedTone.value.hex)
+const effectiveForeground = computed(() => contrastTextMode.value === 'white'
+  ? '#FFFFFF'
+  : contrastTextMode.value === 'black'
+    ? '#000000'
+    : foregroundUsePrimary.value
+      ? props.foundations.colors.primary
+      : getAccessibleTextColor(props.foundations.colors.background).hex)
 const effectiveForegroundRatio = computed(() => getContrastRatio(effectiveForeground.value, props.foundations.colors.background))
 const effectiveForegroundCompliant = computed(() => effectiveForegroundRatio.value >= 4.5)
 const contrastSamples = computed(() => primaryColorScale.value.map(tone => {
   const automatic = getAccessibleTextColor(tone.hex)
-  const foreground = foregroundUsePrimary.value
-    ? props.foundations.colors.primary
-    : contrastTextMode.value === 'white'
-      ? '#FFFFFF'
-      : contrastTextMode.value === 'black'
-        ? '#000000'
-        : automatic.hex
+  const foreground = contrastTextMode.value === 'white'
+    ? '#FFFFFF'
+    : contrastTextMode.value === 'black'
+      ? '#000000'
+      : automatic.hex
   const ratio = getContrastRatio(tone.hex, foreground)
+  // Mantiene juntos el color de texto elegido, el ratio WCAG y el resultado AA de cada tono mostrado.
   return {
     ...tone,
     foreground,
@@ -147,6 +147,8 @@ const fontWeightOptions = computed(() => getAvailableFontWeights(props.foundatio
 const selectedSemanticField = computed(() => semanticFields.find(field => field.key === selectedSemantic.value))
 const foundationTokens = computed(() => getFoundationTokens(props.cssVariables, props.activeFoundation))
 const visibleCodeTokens = computed(() => showFullCss.value ? props.cssVariables : foundationTokens.value)
+
+// Sigue aliases var(...) hasta su valor final; el conjunto visited evita ciclos entre referencias CSS.
 function resolveTokenValue(name, visited = new Set()) {
   if (visited.has(name)) return props.cssVariables[name]
   visited.add(name)
@@ -210,11 +212,12 @@ watch(() => props.foundations.colors.primary, value => {
   primaryHexError.value = ''
 })
 
-function setPrimaryColor(value, selectedTone = 'auto') {
+function setPrimaryColor(value) {
   const normalized = normalizeHexColor(value)
   if (!normalized) return false
   props.foundations.colors.primary = normalized
-  props.foundations.colors.primaryTone = selectedTone
+  // El color de origen se fija como tono 500; el valor auto vuelve a calcularse desde esa nueva escala.
+  props.foundations.colors.primaryTone = '500'
   primaryHexDraft.value = normalized
   primaryHexError.value = ''
   return true
@@ -223,10 +226,11 @@ function setPrimaryColor(value, selectedTone = 'auto') {
 function selectPrimaryTone(name) {
   const tone = primaryColorScale.value.find(item => item.name === String(name))
   if (!tone) return
-  setPrimaryColor(tone.hex, name)
+  props.foundations.colors.primaryTone = tone.name
 }
 
 function setUsePrimaryForeground(event) {
+  // Al elegir el color de marca como texto, vuelve a automático el selector para evitar modos contradictorios.
   foregroundUsePrimary.value = event.target.checked
   contrastTextMode.value = 'auto'
 }
@@ -246,6 +250,7 @@ async function navigateForegroundTones(event, index) {
       ? tones.length - 1
       : (index + (['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : -1) + tones.length) % tones.length
   const colorScale = event.currentTarget.closest('.foundation-color-scale')
+  // Espera al DOM reactivo antes de mover el foco al swatch seleccionado.
   selectPrimaryTone(tones[nextIndex].name)
   await nextTick()
   colorScale?.querySelectorAll('.foundation-color-sample__tone')[nextIndex]?.focus()
@@ -276,10 +281,12 @@ function updateBaseSize(event) {
   }
 
   baseSizeError.value = ''
+  // Solo se propaga un tamaño válido; la escala y la vista previa no reciben valores parciales del borrador.
   props.foundations.typography.baseSize = value
 }
 
 function commitBaseSize() {
+  // Si el borrador es inválido al salir del campo, restaura el último valor confirmado.
   if (!baseSizeError.value) return
   baseSizeDraft.value = String(props.foundations.typography.baseSize)
   baseSizeError.value = ''
@@ -289,6 +296,7 @@ function updateFontFamily(fontFamily) {
   props.foundations.typography.fontFamily = fontFamily
   const availableWeights = getAvailableFontWeights(fontFamily)
 
+  // Corrige los estilos semánticos cuyo peso deje de estar disponible en la nueva familia.
   for (const style of Object.values(props.foundations.typography.semanticStyles)) {
     if (availableWeights.includes(style.weight)) continue
     style.weight = availableWeights.reduce((closest, option) => (
@@ -368,7 +376,7 @@ function navigateRadiusOptions(event, category, index) {
                     <label class="foundation-foreground-toggle"><input :checked="foregroundUsePrimary" type="checkbox" role="switch" aria-label="Use primary color" @change="setUsePrimaryForeground" /><span class="foundation-foreground-toggle__track" aria-hidden="true"><span></span></span><span>Use primary color</span></label>
                     <div class="foreground-control foundation-contrast-toolbar__options" role="radiogroup" aria-label="Text color for contrast samples">
                       <label v-for="option in contrastTextOptions" :key="option.value" class="foundation-contrast-toolbar__option">
-                        <input v-model="contrastTextMode" type="radio" name="contrast-text-mode" :value="option.value" :disabled="foregroundUsePrimary" />
+                        <input v-model="contrastTextMode" type="radio" name="contrast-text-mode" :value="option.value" />
                         <span>{{ option.label }}</span>
                       </label>
                     </div>
@@ -384,14 +392,23 @@ function navigateRadiusOptions(event, category, index) {
                 <div class="foundation-color-scale" role="radiogroup" aria-label="Choose a primary tone">
                   <article v-for="(tone, index) in contrastSamples" :key="tone.name" role="none" class="foundation-color-sample" :class="{ 'foundation-color-sample--recommended': tone.name === recommendedTone.name, 'foundation-color-sample--selected': tone.name === selectedPrimaryTone.name }">
                     <button class="foundation-color-sample__tone" type="button" role="radio" :aria-checked="tone.name === selectedPrimaryTone.name" :aria-label="`Set tone ${tone.name} as primary`" :tabindex="tone.name === selectedPrimaryTone.name ? 0 : -1" @click="selectPrimaryTone(tone.name)" @keydown="navigateForegroundTones($event, index)">
-                      <header><strong>{{ tone.name }}</strong><code>{{ tone.token }}</code></header>
+                      <header>
+                        <div class="foundation-color-sample__heading">
+                          <strong>{{ tone.name }}</strong>
+                          <span
+                            class="foundation-color-sample__selection"
+                            :class="{ 'foundation-color-sample__selection--hidden': tone.name !== selectedPrimaryTone.name }"
+                            :aria-hidden="tone.name !== selectedPrimaryTone.name"
+                          >Selected Primary</span>
+                        </div>
+                        <code>{{ tone.token }}</code>
+                      </header>
                       <div class="foundation-color-sample__swatch" :style="{ backgroundColor: tone.hex, color: tone.foreground }" aria-hidden="true">A</div>
                       <div class="foundation-color-sample__result">
                         <div v-if="tone.name === recommendedTone.name" class="foundation-color-sample__recommendation">
                           <span>Recommended</span>
                           <span>{{ recommendedToneRatio >= 4.5 ? getContrastLabel(recommendedToneRatio) : 'Below AA' }}</span>
                         </div>
-                        <div v-if="tone.name === selectedPrimaryTone.name" class="foundation-color-sample__selection">Selected primary</div>
                         <code>{{ tone.hex }}</code>
                         <div class="foundation-contrast-result">
                           <strong class="foundation-contrast-result__ratio">{{ tone.ratioLabel }}</strong>

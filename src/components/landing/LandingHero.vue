@@ -1,5 +1,7 @@
 <script setup>
 import DashboardScrollShowcase from './DashboardScrollShowcase.vue'
+
+defineProps({ theme: { type: String, required: true } })
 </script>
 
 <template>
@@ -18,7 +20,7 @@ import DashboardScrollShowcase from './DashboardScrollShowcase.vue'
         </div>
       </div>
 
-      <DashboardScrollShowcase />
+      <DashboardScrollShowcase :theme="theme" />
     </div>
   </section>
 </template>

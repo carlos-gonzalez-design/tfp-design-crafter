@@ -1,4 +1,5 @@
 <script setup>
+// Simula una vista de proyectos filtrable y anuncia cambios de selección mediante una región accesible.
 import { computed, ref } from 'vue'
 import { ArrowRight, ArrowUp, Search } from '@lucide/vue'
 import DsButton from '../design-system/actions/DsButton.vue'
@@ -28,6 +29,7 @@ const projects = [
 ]
 
 const filteredProjects = computed(() => {
+  // Combina búsqueda por nombre/propietario con filtros de estado sin alterar la lista fuente.
   const query = search.value.trim().toLowerCase()
   return projects.filter(project => {
     const matchesQuery = !query || `${project.name} ${project.owner}`.toLowerCase().includes(query)

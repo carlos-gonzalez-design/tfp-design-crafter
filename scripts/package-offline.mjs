@@ -2,6 +2,7 @@ import { access, readFile, writeFile } from 'node:fs/promises'
 import { dirname, extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+// Incrusta el JavaScript, CSS y recursos locales en dist/index.html para poder abrirlo sin servidor.
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const distRoot = join(projectRoot, 'dist')
 const htmlPath = join(distRoot, 'index.html')
@@ -25,6 +26,7 @@ const toDataUrl = async (filePath) => {
 }
 
 const replaceAsync = async (source, pattern, replacer) => {
+  // Aplica reemplazos asíncronos de atrás hacia delante para conservar los índices originales de coincidencia.
   const matches = [...source.matchAll(pattern)]
   const replacements = await Promise.all(matches.map((match) => replacer(match)))
 
@@ -51,6 +53,7 @@ let javascript = await readFile(scriptPath, 'utf8')
 let css = await readFile(stylesheetPath, 'utf8')
 
 css = await replaceAsync(css, /url\((['"]?)(?!data:|https?:|#)([^)'"\s]+)\1\)/g, async (match) => {
+  // Convierte URLs relativas de fuentes e imágenes en data URLs dentro del CSS.
   const assetPath = resolve(dirname(stylesheetPath), match[2])
   return `url("${await toDataUrl(assetPath)}")`
 })

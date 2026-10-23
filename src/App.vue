@@ -1,4 +1,5 @@
 <script setup>
+// Resuelve la ruta actual y cambia entre landing y dashboard sin recargar la aplicación.
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import LandingView from './views/LandingView.vue'
 
@@ -7,6 +8,7 @@ const currentPath = ref(window.location.pathname)
 const normalizedPath = computed(() => currentPath.value.replace(/\/$/, '') || '/')
 const isLanding = computed(() => normalizedPath.value === '/')
 
+// Mantiene una navegación ligera con History API; popstate actualiza la vista al usar atrás/adelante.
 function syncPath() {
   currentPath.value = window.location.pathname
   window.scrollTo({ top: 0, behavior: 'instant' })

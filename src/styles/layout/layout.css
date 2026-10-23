@@ -50,37 +50,6 @@
     font-size: 0.75rem;
   }
 
-  .app-header__nav {
-    display: flex;
-    align-self: stretch;
-    gap: var(--dc-space-1);
-    margin-inline-start: auto;
-
-    & a {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      padding-inline: var(--dc-space-3);
-      color: var(--dc-color-muted);
-      font-size: var(--dc-font-size-12);
-      font-weight: var(--dc-font-weight-medium);
-
-      &:hover { color: var(--dc-color-ink); }
-      &[aria-current='page'] {
-        color: var(--dc-color-ink);
-        &::after {
-          content: '';
-          position: absolute;
-          inset-inline: var(--dc-space-3);
-          inset-block-end: -1px;
-          height: var(--dc-border-width-active);
-          background: var(--dc-color-brand);
-        }
-      }
-      &:focus-visible { outline: 0; box-shadow: inset var(--dc-shadow-focus); }
-    }
-  }
-
   .app-header__session-controls {
     display: inline-flex;
     flex: 0 0 auto;
@@ -88,6 +57,7 @@
     justify-content: center;
     gap: var(--dc-space-2);
     min-width: 0;
+    margin-inline-start: auto;
   }
 
   .theme-control,
@@ -629,7 +599,6 @@
 
     .app-header__label { display: none; }
 
-    .app-header__nav a { padding-inline: var(--dc-space-2); }
     .app-header__session-controls { gap: var(--dc-space-1); }
 
     .dashboard {
@@ -709,8 +678,6 @@
   @media (max-width: 36rem) {
     .app-header { gap: var(--dc-space-2); padding-inline: var(--dc-space-3); }
     .app-header__brand img { height: 1.75rem; }
-    .app-header__nav { gap: 0; }
-    .app-header__nav a { padding-inline: var(--dc-space-1); font-size: var(--dc-font-size-10); }
     .theme-control { width: 2.5rem; padding-inline: 0; }
     .theme-control span,
     .user-session__name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

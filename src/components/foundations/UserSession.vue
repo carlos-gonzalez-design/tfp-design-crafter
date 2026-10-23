@@ -1,4 +1,5 @@
 <script setup>
+// Controla el popover de sesión y cierra/restaura el foco ante clic exterior o Escape.
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { UserRound } from '@lucide/vue'
 
@@ -10,6 +11,7 @@ const details = ref(null)
 async function toggle() {
   open.value = !open.value
   if (open.value) {
+    // Al abrir el panel, lleva el foco dentro para que sea operable con teclado.
     await nextTick()
     details.value?.focus()
   }

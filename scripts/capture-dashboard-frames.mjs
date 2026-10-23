@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
+// Automatiza capturas de las cinco foundations en ambos temas mediante Chrome DevTools Protocol.
 const cdpUrl = process.env.CDP_URL || 'http://127.0.0.1:9230'
 const appUrl = process.env.APP_URL || 'http://127.0.0.1:5173/app'
 const outputDirectory = resolve('public/images/dashboard-showcase')
@@ -12,6 +13,7 @@ const frames = [
   { id: 'spacing', label: 'Spacing' },
   { id: 'radius', label: 'Border Radius' },
 ]
+const themes = ['light', 'dark']
 
 const pages = await (await fetch(`${cdpUrl}/json`)).json()
 const page = pages.find(item => item.type === 'page')
@@ -31,6 +33,7 @@ socket.addEventListener('message', event => {
 })
 
 function call(method, params = {}) {
+  // Asocia cada mensaje CDP a su promesa hasta que Chrome responda con el mismo identificador.
   return new Promise((resolveCall, reject) => {
     const id = ++nextId
     pending.set(id, { resolve: resolveCall, reject })
@@ -58,26 +61,35 @@ try {
   await mkdir(outputDirectory, { recursive: true })
   await call('Runtime.enable')
   await call('Page.enable')
-  await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false })
+  await call('Emulation.setDeviceMetricsOverride', { width: 1920, height: 1200, deviceScaleFactor: 2, mobile: false })
   await call('Page.navigate', { url: appUrl })
   await waitFor('.foundation-overview')
   await waitFor('.preview-canvas')
   await evaluate('document.fonts.ready')
 
-  for (const frame of frames) {
-    await evaluate(`(() => {const button=Array.from(document.querySelectorAll('.foundation-nav__item')).find(element=>element.textContent.trim()===${JSON.stringify(frame.label)});if(!button)throw new Error(${JSON.stringify(`Missing foundation: ${frame.label}`)});button.click()})()`)
-    await pause()
-    await evaluate('document.querySelector(".dashboard__editor-pane").scrollTop=0;document.querySelector(".preview-canvas").scrollTop=0')
-    await pause(120)
-    const screenshot = await call('Page.captureScreenshot', {
-      format: 'webp',
-      quality: 82,
-      fromSurface: true,
-      captureBeyondViewport: false,
-    })
-    const filePath = resolve(outputDirectory, `${frame.id}.webp`)
-    await writeFile(filePath, Buffer.from(screenshot.data, 'base64'))
-    console.log(`CAPTURED ${frame.id}.webp`)
+  for (const theme of themes) {
+    await evaluate(`localStorage.setItem('design-crafter-theme', ${JSON.stringify(theme)})`)
+    await call('Page.reload')
+    await waitFor('.foundation-overview')
+    await waitFor('.preview-canvas')
+    await evaluate('document.fonts.ready')
+    await pause(300)
+
+    for (const frame of frames) {
+      await evaluate(`(() => {const button=Array.from(document.querySelectorAll('.foundation-nav__item')).find(element=>element.textContent.trim()===${JSON.stringify(frame.label)});if(!button)throw new Error(${JSON.stringify(`Missing foundation: ${frame.label}`)});button.click()})()`)
+      await pause(400)
+      await evaluate('document.querySelector(".dashboard__editor-pane").scrollTop=0;document.querySelector(".preview-canvas").scrollTop=0')
+      await pause(180)
+      const screenshot = await call('Page.captureScreenshot', {
+        format: 'webp',
+        quality: 92,
+        fromSurface: true,
+        captureBeyondViewport: false,
+      })
+      const filePath = resolve(outputDirectory, `${frame.id}-${theme}.webp`)
+      await writeFile(filePath, Buffer.from(screenshot.data, 'base64'))
+      console.log(`CAPTURED ${frame.id}-${theme}.webp`)
+    }
   }
 } finally {
   socket.close()

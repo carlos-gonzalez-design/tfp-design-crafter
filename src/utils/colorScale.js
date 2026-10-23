@@ -1,5 +1,6 @@
 import { getBrandColor } from './brand.js'
 
+// Convierte colores sRGB a OKLCH para crear tonos perceptualmente ordenados y asignar roles con contraste medible.
 export const PRIMARY_TONE_NAMES = Object.freeze(['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'])
 
 const TONE_LIGHTNESS = Object.freeze({
@@ -46,6 +47,7 @@ function hexToRgb(value) {
 }
 
 function linearize(channel) {
+  // Deshace la curva gamma de sRGB antes de operar con luminancia y coordenadas perceptuales.
   return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
 }
 
@@ -58,6 +60,7 @@ function rgbToHex(channels) {
 }
 
 function srgbToOklch(value) {
+  // Convierte sRGB lineal a OKLab y pasa de sus ejes a croma y ángulo para trabajar en OKLCH.
   const rgb = hexToRgb(value).map(linearize)
   const l = 0.4122214708 * rgb[0] + 0.5363325363 * rgb[1] + 0.0514459929 * rgb[2]
   const m = 0.2119034982 * rgb[0] + 0.6806995451 * rgb[1] + 0.1073969566 * rgb[2]
@@ -102,6 +105,7 @@ function gamutMappedOklch(lightness, chroma, hue) {
   let resolvedChroma = chroma
   let channels = oklchToLinearSrgb(lightness, resolvedChroma, hue)
   if (!isInSrgbGamut(channels)) {
+    // Conserva la luminosidad y el matiz pedidos reduciendo solo el croma hasta volver al rango visible sRGB.
     let low = 0
     let high = chroma
     for (let index = 0; index < 24; index += 1) {
@@ -122,18 +126,25 @@ function gamutMappedOklch(lightness, chroma, hue) {
   }
 }
 
-export function getPrimaryColorScale(source, exactToneName = '') {
+export function getPrimaryColorScale(source) {
   const normalizedSource = normalizeHexColor(source) ?? getBrandColor()
   const origin = srgbToOklch(normalizedSource)
   return PRIMARY_TONE_NAMES.map(name => {
-    const lightness = TONE_LIGHTNESS[name]
+    const index = PRIMARY_TONE_NAMES.indexOf(name)
+    const targetLightness = TONE_LIGHTNESS[name]
+    const lightness = index < 5 && origin.lightness > TONE_LIGHTNESS['400']
+      ? origin.lightness + ((5 - index) / 5) * (0.98 - origin.lightness)
+      : index > 5 && origin.lightness < TONE_LIGHTNESS['600']
+        ? origin.lightness - ((index - 5) / 5) * (origin.lightness - 0.02)
+        : targetLightness
     const mapped = gamutMappedOklch(lightness, origin.chroma * TONE_CHROMA_FACTOR[name], origin.hue)
     return {
       name,
       token: `--color-primary-${name}`,
-      hex: name === String(exactToneName) ? normalizedSource : mapped.hex,
+      // El tono 500 conserva exactamente el color de origen; elegir otro tono no regenera la paleta.
+      hex: name === '500' ? normalizedSource : mapped.hex,
       lightness,
-      chroma: name === String(exactToneName) ? origin.chroma : mapped.chroma,
+      chroma: name === '500' ? origin.chroma : mapped.chroma,
     }
   })
 }
@@ -144,6 +155,7 @@ export function getRecommendedPrimaryTone(scale, source, background = '#FFFFFF',
     return { ...tone, ratio: getContrastRatio(tone.hex, background) }
   })
   const passingTones = candidates.filter(tone => tone.ratio >= minimum)
+  // Si ningún tono alcanza el umbral, devuelve el más cercano al origen entre los disponibles.
   const eligible = passingTones.length ? passingTones : candidates
   return [...eligible].sort((first, second) => (
     Math.abs(first.lightness - sourceLightness) - Math.abs(second.lightness - sourceLightness)
@@ -159,6 +171,7 @@ export function getRelativeLuminance(value) {
 }
 
 export function getContrastRatio(first, second) {
+  // Aplica la relación WCAG entre luminancias relativas; 4.5:1 es el umbral AA usado para texto normal.
   const firstLuminance = getRelativeLuminance(first)
   const secondLuminance = getRelativeLuminance(second)
   return (Math.max(firstLuminance, secondLuminance) + 0.05) / (Math.min(firstLuminance, secondLuminance) + 0.05)
@@ -171,6 +184,7 @@ export function getContrastLabel(ratio) {
 }
 
 export function getAccessibleTextColor(background) {
+  // Compara blanco y negro y devuelve la opción con mayor contraste para el fondo indicado.
   const whiteRatio = getContrastRatio(background, '#FFFFFF')
   const blackRatio = getContrastRatio(background, '#000000')
   return blackRatio >= whiteRatio
@@ -235,6 +249,7 @@ export function getPrimaryColorRoles(scale, colors = {}, primaryTone = 'auto') {
 
   const selectedToneIndex = scale.findIndex(tone => tone.name === String(primaryTone))
   if (selectedToneIndex < 0) return roles
+  // La elección manual desplaza juntos los roles semánticos, manteniendo sus relaciones de tono.
   const offset = selectedToneIndex - actionIndex
   const shift = name => {
     const index = scale.findIndex(tone => tone.name === name)

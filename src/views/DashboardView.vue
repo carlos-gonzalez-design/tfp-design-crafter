@@ -1,4 +1,5 @@
 <script setup>
+// Coordina el estado de foundations y conecta sus tokens derivados con el editor, la vista previa y los diálogos.
 import { computed, onMounted, reactive, ref } from 'vue'
 import FoundationPanel from '../components/foundations/FoundationPanel.vue'
 import FoundationOverview from '../components/foundations/FoundationOverview.vue'
@@ -28,6 +29,7 @@ const isExportOpen = ref(false)
 const exportPreferences = reactive({ unit: 'rem', includeComments: true, stylesheetName: 'design-crafter' })
 const syncStatus = useSyncStatus(foundations)
 const isUiKit = computed(() => props.currentPath.replace(/\/$/, '') === '/ui-kit')
+// Cada cambio en foundations regenera el mismo mapa de tokens consumido por editor, preview y exportación.
 const cssVariables = computed(() => createDesignTokens(foundations))
 
 function navigate(event, path) {
@@ -48,10 +50,12 @@ function updateExportPreferences(value) {
 
 function closeExport() {
   isExportOpen.value = false
+  // Devuelve el foco al control que abrió el diálogo tras actualizar el DOM.
   requestAnimationFrame(() => document.querySelector('.export-css-button')?.focus())
 }
 
 function resetFoundations() {
+  // Restaura los valores en el objeto reactivo existente para que todos los consumidores sigan conectados.
   const defaults = createDefaultFoundations()
   for (const key of Object.keys(foundations)) {
     if (typeof foundations[key] === 'object') Object.assign(foundations[key], defaults[key])
@@ -77,10 +81,6 @@ onMounted(() => {
         <img :src="theme === 'dark' ? '/images/logo-design-crafter-dark.svg' : '/images/logo-design-crafter.svg'" alt="Design Crafter" />
       </a>
       <span class="app-header__label">Visual Design Playground</span>
-      <nav class="app-header__nav" aria-label="Main navigation">
-        <a href="/app" :aria-current="!isUiKit ? 'page' : undefined" @click="navigate($event, '/app')">Dashboard</a>
-        <a href="/ui-kit" :aria-current="isUiKit ? 'page' : undefined" @click="navigate($event, '/ui-kit')">UI Kit</a>
-      </nav>
       <div class="app-header__session-controls">
         <ThemeControl class="app-header__theme-control" :theme="theme" @change="setTheme" />
         <UserSession />
