@@ -6,7 +6,7 @@ La herramienta está pensada para diseñadores y desarrolladores que quieren ent
 
 # Enlaces de interés
 Github del proyecto: https://github.com/carlos-gonzalez-design/tfp-design-crafter <br>
-Proyecto en Netlify: https://design-crafter-playground.netlify.app/
+Proyecto en Netlify: https://design-crafter-playground.netlify.app/ <br>
 Memoria: 
 
 ## Qué puedes hacer
