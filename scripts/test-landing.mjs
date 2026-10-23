@@ -69,15 +69,54 @@ try {
   await waitFor('.landing-hero')
   await waitFor('.live-demo__card')
 
+  if (await evaluate('location.port === "4173"')) {
+    assert.equal(await evaluate('navigator.serviceWorker.ready.then(registration => Boolean(registration.active))'), true)
+    console.log('PASS Production service worker activation')
+  }
+
+  assert.equal(await evaluate('getComputedStyle(document.documentElement).getPropertyValue("--dc-color-brand").trim()'), '#635bff')
+  assert.equal(await evaluate('getComputedStyle(document.querySelector(".landing-hero .landing-link--brand")).backgroundColor'), 'rgb(99, 91, 255)')
+  assert.equal(await evaluate('getComputedStyle(document.querySelector(".landing-hero .landing-link--brand")).color'), 'rgb(255, 255, 255)')
+  assert.equal(await evaluate('Array.from(document.querySelectorAll(".landing-brand img")).length'), 2)
+  assert.equal(await evaluate('document.querySelector(".landing-header .landing-brand img").getAttribute("src").endsWith(`/images/logo-design-crafter${document.querySelector(".landing").dataset.theme === "dark" ? "-dark" : ""}.svg`)'), true)
+  assert.equal(await evaluate('document.querySelector(".landing-footer .landing-brand img").getAttribute("src").endsWith("/images/logo-design-crafter-dark.svg")'), true)
+  assert.equal(await evaluate('Array.from(document.querySelectorAll(".landing-brand__mark")).length'), 0)
   assert.deepEqual(await evaluate('Array.from(document.querySelectorAll("h1 > *"), element => element.textContent.trim())'), ['Craft your system.', 'Shape your design.'])
   assert.equal(await evaluate('document.querySelectorAll(".foundation-tile").length'), 4)
   assert.equal(await evaluate('document.querySelectorAll(`a[data-app-link][href="/app"]`).length >= 3'), true)
+  assert.equal(await evaluate('Array.from(document.querySelectorAll(".landing-footer a")).some(link => link.textContent.includes("UI Kit") && link.getAttribute("href") === "/ui-kit")'), true)
+  assert.equal(await evaluate('Array.from(document.querySelectorAll(".landing-footer a")).some(link => link.textContent.includes("Open Playground") && link.getAttribute("href") === "/app")'), true)
+  assert.equal(await evaluate('document.querySelector(".landing-footer").textContent.includes("Final Project")'), false)
+  assert.equal(await evaluate('Boolean(document.querySelector(".dashboard-scroll-showcase figcaption h2") && document.querySelector(".dashboard-scroll-showcase figcaption").compareDocumentPosition(document.querySelector(".dashboard-scroll-showcase__frame")) & Node.DOCUMENT_POSITION_FOLLOWING)'), true)
+  assert.equal(await evaluate('getComputedStyle(document.querySelector(".dashboard-scroll-showcase figcaption p")).textAlign'), 'center')
+  assert.equal(await evaluate('document.querySelector(".landing-install") !== null'), true)
+  assert.equal(await evaluate('Promise.all([fetch("/manifest.webmanifest"), fetch("/sw.js")]).then(responses => responses.every(response => response.ok))'), true)
   assert.deepEqual(await evaluate('Array.from(document.querySelectorAll(".landing-header__navigation > a:not([data-app-link]), .landing-hero .landing-link--light"), element => element.getAttribute("href"))'), ['#features', '#how-it-works', '#about', '#features'])
   await evaluate('Promise.all(Array.from(document.querySelectorAll(".dashboard-scroll-showcase__stage img"), image => image.complete ? true : new Promise(resolve => image.addEventListener("load", resolve, { once: true }))))')
   assert.equal(await evaluate('document.querySelectorAll(".dashboard-scroll-showcase__stage img").length'), 5)
-  assert.equal(await evaluate('Array.from(document.querySelectorAll(".dashboard-scroll-showcase__stage img")).every(image => image.complete && image.naturalWidth === 1440 && image.naturalHeight === 900)'), true)
+  assert.equal(await evaluate('Array.from(document.querySelectorAll(".dashboard-scroll-showcase__stage img")).every(image => image.complete && image.naturalWidth === 3840 && image.naturalHeight === 2400 && getComputedStyle(image).objectFit === "contain")'), true)
+  assert.equal(await evaluate('Array.from(document.querySelectorAll(".dashboard-scroll-showcase__stage img"), image => image.getAttribute("src").endsWith("-" + document.querySelector(".landing").dataset.theme + ".webp")).every(Boolean)'), true)
   assert.equal(await evaluate('document.querySelectorAll(".dashboard-scroll-showcase__controls button").length'), 5)
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'))
+  await clickText('.landing-theme-control button', 'Dark')
+  assert.equal(await evaluate('document.querySelector(".landing").dataset.theme'), 'dark')
+  await evaluate('Promise.all(Array.from(document.querySelectorAll(".dashboard-scroll-showcase__stage img"), image => image.complete ? true : new Promise(resolve => image.addEventListener("load", resolve, { once: true }))))')
+  assert.equal(await evaluate('Array.from(document.querySelectorAll(".dashboard-scroll-showcase__stage img"), image => image.getAttribute("src").endsWith("-dark.webp")).every(Boolean)'), true)
+  assert.equal(await evaluate('localStorage.getItem("design-crafter-theme")'), 'dark')
+  assert.equal(await evaluate('document.querySelector(".landing-header .landing-brand img").getAttribute("src").endsWith("logo-design-crafter-dark.svg")'), true)
+  assert.equal(await evaluate('getComputedStyle(document.querySelector(".foundations-showcase")).backgroundColor'), 'rgb(17, 17, 19)')
+  assert.equal(await evaluate('getComputedStyle(document.querySelector(".landing-eyebrow")).alignItems'), 'center')
+  assert.equal(await evaluate('getComputedStyle(document.querySelector(".landing-eyebrow")).gap'), '2px')
+  await evaluate('document.querySelector(".landing-header__cta").click()')
+  await waitFor('.dashboard')
+  assert.equal(await evaluate('document.querySelector(".app-shell").classList.contains("dc-theme--dark")'), true)
+  await evaluate('history.back()')
+  await waitFor('.landing-hero')
+  assert.equal(await evaluate('document.querySelector(".landing").dataset.theme'), 'dark')
+  await clickText('.landing-theme-control button', 'Light')
+  assert.equal(await evaluate('document.querySelector(".landing").dataset.theme'), 'light')
+  assert.equal(await evaluate('Array.from(document.querySelectorAll(".dashboard-scroll-showcase__stage img"), image => image.getAttribute("src").endsWith("-light.webp")).every(Boolean)'), true)
+  assert.equal(await evaluate('document.querySelector(".landing-header .landing-brand img").getAttribute("src").endsWith("logo-design-crafter.svg")'), true)
   console.log('PASS Landing structure, five real dashboard frames and desktop overflow')
 
   assert.equal(await evaluate('document.querySelector(".dashboard-scroll-showcase").classList.contains("dashboard-scroll-showcase--scroll-driven")'), true)
@@ -128,6 +167,7 @@ try {
     await call('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: false })
     await pause()
     assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), `Landing overflow at ${width}px`)
+    assert.ok(await evaluate('Array.from(document.querySelectorAll(".landing-brand img")).every(image=>image.getBoundingClientRect().width>0&&image.getBoundingClientRect().width<=innerWidth)'), `Landing logo sizing at ${width}px`)
   }
   assert.equal(await evaluate('document.querySelector(".dashboard-scroll-showcase").classList.contains("dashboard-scroll-showcase--scroll-driven")'), false)
   assert.notEqual(await evaluate('getComputedStyle(document.querySelector(".dashboard-scroll-showcase__sticky")).position'), 'sticky')
@@ -159,6 +199,7 @@ try {
   console.log('PASS CTA navigation to /app and browser history')
 
   if (process.env.SCREENSHOT_PATH) {
+    await clickText('.landing-theme-control button', 'Light')
     await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] })
     await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false })
     await call('Page.navigate', { url: appUrl })
@@ -169,7 +210,16 @@ try {
     await writeFile(process.env.SCREENSHOT_PATH, Buffer.from(screenshot.data, 'base64'))
   }
 
+  if (process.env.DARK_SCREENSHOT_PATH) {
+    await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false })
+    await evaluate('document.querySelectorAll("[data-reveal]").forEach(element => element.classList.add("is-visible"))')
+    await clickText('.landing-theme-control button', 'Dark')
+    const screenshot = await call('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true })
+    await writeFile(process.env.DARK_SCREENSHOT_PATH, Buffer.from(screenshot.data, 'base64'))
+  }
+
   if (process.env.MOBILE_SCREENSHOT_PATH) {
+    await clickText('.landing-theme-control button', 'Light')
     await call('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true })
     await call('Page.navigate', { url: appUrl })
     await waitFor('.landing-hero')
@@ -178,6 +228,27 @@ try {
     const screenshot = await call('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true })
     await writeFile(process.env.MOBILE_SCREENSHOT_PATH, Buffer.from(screenshot.data, 'base64'))
   }
+
+  if (process.env.MOBILE_DARK_SCREENSHOT_PATH) {
+    await clickText('.landing-theme-control button', 'Dark')
+    const screenshot = await call('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true })
+    await writeFile(process.env.MOBILE_DARK_SCREENSHOT_PATH, Buffer.from(screenshot.data, 'base64'))
+  }
+
+  const fallbackAvailable = await evaluate('document.querySelector(".landing-install button").textContent.includes("How to install")')
+  if (fallbackAvailable) {
+    await evaluate('document.querySelector(".landing-install button").click()')
+    await pause()
+    assert.equal(await evaluate('Boolean(document.querySelector(".landing-install [role=status]"))'), true)
+  }
+  await evaluate('(() => {const event=new Event("beforeinstallprompt",{cancelable:true});event.prompt=()=>{window.__installPromptCalled=true};event.userChoice=Promise.resolve({outcome:"accepted"});window.dispatchEvent(event)})()')
+  await evaluate('document.querySelector(".landing-install button").click()')
+  await pause()
+  assert.equal(await evaluate('window.__installPromptCalled'), true)
+  await evaluate('window.dispatchEvent(new Event("appinstalled"))')
+  await pause()
+  assert.equal(await evaluate('document.querySelector(".landing-install")'), null)
+  console.log(`PASS PWA ${fallbackAvailable ? 'fallback instructions' : 'native install action'}, prompt handling and installed state`)
 
   if (process.env.SHOWCASE_SCREENSHOT_PATH) {
     await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] })

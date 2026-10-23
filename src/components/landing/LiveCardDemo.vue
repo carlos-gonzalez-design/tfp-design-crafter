@@ -5,9 +5,11 @@ import DsCard from '../design-system/cards/DsCard.vue'
 import DsSegmentedControl from '../design-system/navigation/DsSegmentedControl.vue'
 import { createDefaultFoundations } from '../../data/defaultDesignSystem.js'
 import { createDesignTokens } from '../../utils/designTokens.js'
+import { getBrandColor } from '../../utils/brand.js'
 
+const brandColor = getBrandColor()
 const palettes = [
-  { id: 'violet', label: 'Violet', primary: '#635BFF', background: '#F5F5F2', surface: '#FFFFFF', text: '#18181B' },
+  { id: 'brand', label: 'Brand', primary: brandColor, background: '#F5F5F2', surface: '#FFFFFF', text: '#18181B' },
   { id: 'cobalt', label: 'Cobalt', primary: '#4353FF', background: '#F3F5FF', surface: '#FFFFFF', text: '#14162A' },
   { id: 'forest', label: 'Forest', primary: '#138A5B', background: '#F1F7F3', surface: '#FFFFFF', text: '#14251E' },
   { id: 'coral', label: 'Coral', primary: '#E85D45', background: '#FFF6F2', surface: '#FFFFFF', text: '#251714' },
@@ -33,7 +35,7 @@ const radii = {
   pill: { card: '32px', inner: '24px', button: '9999px' },
 }
 
-const selectedPalette = ref('violet')
+const selectedPalette = ref('brand')
 const selectedTypography = ref('geist')
 const selectedRadius = ref('subtle')
 const palette = computed(() => palettes.find(option => option.id === selectedPalette.value) ?? palettes[0])
@@ -59,7 +61,7 @@ const previewTokens = computed(() => {
 })
 
 function resetDemo() {
-  selectedPalette.value = 'violet'
+  selectedPalette.value = 'brand'
   selectedTypography.value = 'geist'
   selectedRadius.value = 'subtle'
 }

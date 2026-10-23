@@ -13,7 +13,7 @@
         <article class="foundation-tile foundation-tile--colors" data-reveal>
           <header><span>01</span><h3>Colors</h3><code>--ds-color-*</code></header>
           <div class="foundation-colors" aria-label="Design Crafter color tokens">
-            <i style="--swatch: #635bff"><small>Brand</small></i>
+            <i style="--swatch: var(--dc-color-brand)"><small>Brand</small></i>
             <i style="--swatch: #ff8f7b"><small>Coral</small></i>
             <i style="--swatch: #a9ebca"><small>Mint</small></i>
             <i style="--swatch: #fafaf9"><small>Canvas</small></i>

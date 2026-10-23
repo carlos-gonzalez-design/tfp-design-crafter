@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { dashboardShowcaseFrames } from '../../data/dashboardShowcaseFrames.js'
 
 const showcase = ref(null)
+const props = defineProps({ theme: { type: String, required: true } })
 const activeIndex = ref(0)
 const progress = ref(0)
 const viewportWidth = ref(typeof window === 'undefined' ? 0 : window.innerWidth)
@@ -12,6 +13,10 @@ let motionQuery
 
 const isScrollDriven = computed(() => viewportWidth.value >= 768 && !reducedMotion.value)
 const activeFrame = computed(() => dashboardShowcaseFrames[activeIndex.value])
+const themedFrames = computed(() => dashboardShowcaseFrames.map(frame => ({
+  ...frame,
+  src: frame[`${props.theme}Src`],
+})))
 const progressPercent = computed(() => `${Math.round(progress.value * 10000) / 100}%`)
 
 function clamp(value, minimum = 0, maximum = 1) {
@@ -117,20 +122,25 @@ onBeforeUnmount(() => {
   >
     <div class="dashboard-scroll-showcase__sticky">
       <figure class="dashboard-scroll-showcase__figure">
+        <figcaption>
+          <span>{{ String(activeIndex + 1).padStart(2, '0') }} / {{ String(dashboardShowcaseFrames.length).padStart(2, '0') }}</span>
+          <h2>{{ activeFrame.label }}</h2>
+          <p>{{ activeFrame.description }}</p>
+        </figcaption>
         <div class="dashboard-scroll-showcase__frame">
           <div class="dashboard-scroll-showcase__bar" aria-hidden="true">
             <span></span><span></span><span></span>
             <p>design-crafter / app</p>
             <i>Live</i>
           </div>
-          <div class="dashboard-scroll-showcase__stage">
+          <div class="dashboard-scroll-showcase__stage" :data-theme="props.theme">
             <img
-              v-for="(frame, index) in dashboardShowcaseFrames"
+              v-for="(frame, index) in themedFrames"
               :key="frame.id"
               :src="frame.src"
               :alt="frame.alt"
-              width="1440"
-              height="900"
+              width="1920"
+              height="1200"
               :loading="index === 0 ? 'eager' : 'lazy'"
               :fetchpriority="index === 0 ? 'high' : 'auto'"
               :aria-hidden="index !== activeIndex"
@@ -140,11 +150,6 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <figcaption>
-          <span>{{ String(activeIndex + 1).padStart(2, '0') }} / {{ String(dashboardShowcaseFrames.length).padStart(2, '0') }}</span>
-          <strong>{{ activeFrame.label }}</strong>
-          <p>{{ activeFrame.description }}</p>
-        </figcaption>
       </figure>
 
       <nav class="dashboard-scroll-showcase__controls" aria-label="Dashboard views">
