@@ -5,8 +5,9 @@
 La herramienta está pensada para diseñadores y desarrolladores que quieren entender la relación entre una decisión visual y su aplicación en la interfaz, sin tener que empezar por editar código a ciegas.
 
 # Enlaces de interés
-Github del proyecto: https://github.com/carlos-gonzalez-design/tfp-design-crafter
+Github del proyecto: https://github.com/carlos-gonzalez-design/tfp-design-crafter <br>
 Proyecto en Netlify: https://design-crafter-playground.netlify.app/
+Memoria: 
 
 ## Qué puedes hacer
 
