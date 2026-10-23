@@ -1,16 +1,78 @@
 # Design Crafter
 
-Design Crafter es una herramienta web orientada a la creación y previsualización de las bases de un sistema de diseño. El proyecto está desarrollado con Vue 3 y Vite.
+**Design Crafter — A Visual Design Playground** es una herramienta front end para convertir decisiones visuales en un sistema de diseño pequeño, coherente y reutilizable. Permite definir foundations, comprobar su efecto en componentes de interfaz y consultar los tokens y estilos CSS resultantes.
 
-## Estado actual del proyecto
+La herramienta está pensada para diseñadores y desarrolladores que quieren entender la relación entre una decisión visual y su aplicación en la interfaz, sin tener que empezar por editar código a ciegas.
 
-El proyecto todavía está bastante verde, pero ya cuenta con una primera base funcional. La aplicación se ha organizado en dos áreas principales:
+## Qué puedes hacer
 
-- **Foundations Panel:** permite modificar los colores, la tipografía, los espaciados y los radios de borde del sistema de diseño.
-- **Preview:** muestra en tiempo real cómo afectan estos cambios a distintos ejemplos de textos, botones y tarjetas.
+- **Definir color:** partir de un color principal y generar una escala tonal; revisar muestras y escoger texto blanco o negro según el contraste.
+- **Ajustar tipografía:** configurar la familia, el tamaño base en `rem` y una escala con nombres consistentes desde `xs` hasta `6xl`.
+- **Configurar spacing:** elegir una escala compacta, regular o relajada para márgenes y padding.
+- **Elegir border radius:** aplicar una opción controlada —Sharp, Subtle o Pill— a los componentes compatibles.
+- **Probar componentes:** ver cómo las foundations se aplican a botones, tarjetas y badges en una vista previa.
+- **Inspeccionar y exportar:** revisar los tokens CSS y los estilos de componentes organizados con BEM.
+- **Cambiar de tema:** consultar la interfaz en modo claro u oscuro.
 
-También se ha comenzado a trabajar con *design tokens*. Los valores seleccionados en el panel Foundations se transforman en variables CSS, se aplican automáticamente a la previsualización y se muestran en un bloque de código CSS generado.
+## Cómo funciona
 
-El CSS está separado por responsabilidades para que el proyecto sea más fácil de mantener y ampliar. Actualmente se divide en estilos base, tipografía, estructura general, componentes, utilidades y estilos específicos de la previsualización. La interfaz también está organizada mediante componentes de Vue independientes para el panel de configuración, el área de previsualización y los distintos elementos del sistema de diseño.
+1. Edita una foundation.
+2. Comprueba el resultado en el preview mientras ajustas los valores.
+3. Revisa los tokens y estilos que representan esas decisiones.
+4. Exporta el resultado para usarlo como punto de partida en otro proyecto.
 
-Por ahora, el trabajo se ha centrado principalmente en definir la estructura de la aplicación, conectar los controles con la previsualización y comprobar el funcionamiento de algunos componentes básicos. Todavía queda bastante por desarrollar, revisar y pulir, pero esta primera versión ya permite comprobar el planteamiento técnico y la dirección que está tomando el proyecto.
+El objetivo no es ofrecer una colección interminable de controles. Cada ajuste debe tener un efecto visible y comprensible en el preview y producir una salida que se pueda mantener.
+
+## Tecnología
+
+- Vue 3
+- Vite
+- JavaScript
+- CSS con custom properties y metodología BEM
+
+## Requisitos
+
+- Node.js y npm instalados.
+
+## Instalación y desarrollo
+
+```bash
+npm install
+npm run dev
+```
+
+Vite mostrará la dirección local para abrir la aplicación en el navegador.
+
+## Compilación
+
+```bash
+npm run build
+```
+
+La versión de producción se genera en `dist/`.
+
+## Criterios del proyecto
+
+- **Una fuente de verdad:** los componentes consumen los tokens definidos en las foundations.
+- **Decisiones con propósito:** las escalas y opciones se limitan para ayudar a crear sistemas consistentes, no para añadir controles decorativos.
+- **Accesibilidad desde el diseño:** el color, el foco, la jerarquía y los estados deben seguir siendo comprensibles al interactuar con teclado o con distintas necesidades de visión.
+- **Feedback inmediato:** los cambios deben verse en contexto antes de exportarlos.
+- **Salida legible:** los nombres de tokens y las clases CSS deben ayudar a entender dónde y para qué se usan.
+- **Diseño adaptable:** la experiencia debe conservar el acceso a la edición, la vista previa y la inspección del código en distintos tamaños de pantalla.
+
+## Documentación
+
+- [`design.md`](./design.md): principios, decisiones de diseño y criterios de accesibilidad del producto.
+
+## Referencias de diseño
+
+Estas referencias informan el enfoque del proyecto; Design Crafter no pretende replicar sus sistemas ni sus componentes.
+
+- [Brad Frost — Atomic Design](https://bradfrost.com/blog/post/atomic-web-design/): pensar las interfaces como componentes relacionados que se componen en estructuras mayores.
+- [Material Design 3 — Design tokens](https://m3.material.io/foundations/design-tokens): usar tokens como valores compartidos entre estilos y componentes.
+- [U.S. Web Design System — Design tokens](https://designsystem.digital.gov/design-tokens/): usar conjuntos de valores discretos para facilitar consistencia y comunicación.
+- [W3C — WCAG 2.2, contraste mínimo](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html): referencia para evaluar el contraste del texto.
+
+## Estado
+
+Proyecto académico desarrollado como playground visual para explorar foundations, componentes y tokens CSS.
